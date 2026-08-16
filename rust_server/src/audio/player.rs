@@ -1008,8 +1008,6 @@ impl RustAudioPlayer {
             };
 
             let mut samples = Vec::with_capacity(524_288);
-            let mut initialized = false;
-            let mut last_update_len = 0usize;
 
             while let Ok(packet) = format.next_packet() {
                 if packet.track_id() != t_id {
@@ -1048,32 +1046,6 @@ impl RustAudioPlayer {
                         }
                         _ => {}
                     }
-                }
-
-                // If buffer is primed with at least 0.5s or grown by 2s, update buffer in real-time
-                if (!initialized && samples.len() >= (src_sr as usize * src_ch as usize / 2))
-                    || (initialized && samples.len() - last_update_len >= (src_sr as usize * src_ch as usize * 2))
-                {
-                    let first_init = !initialized;
-                    initialized = true;
-                    last_update_len = samples.len();
-                    let mut audio_guard = audio_data.write().unwrap();
-                    let mut st = state.lock().unwrap();
-
-                    *audio_guard = Some(DecodedAudio {
-                        samples: samples.clone(),
-                        sample_rate: src_sr,
-                        channels: src_ch,
-                        duration_secs: 0.0,
-                    });
-
-                    st.track_id = Some(track_id);
-                    if first_init {
-                        st.is_playing = true;
-                    }
-                    st.original_sr = src_sr;
-                    st.original_bits = src_bits;
-                    st.requested_sr = Some(src_sr);
                 }
             }
 
@@ -1417,9 +1389,12 @@ impl RustAudioPlayer {
                     let mut buf = vec![0u8; byte_count];
 
                     let vol_norm = {
-                        let st = state.lock().unwrap();
-                        let v = st.volume;
-                        if v > 1.0 { v / 100.0 } else { v }
+                        if let Ok(st) = state.try_lock() {
+                            let v = st.volume;
+                            if v > 1.0 { v / 100.0 } else { v }
+                        } else {
+                            1.0
+                        }
                     }
                     .clamp(0.0, 1.0);
 
@@ -1542,14 +1517,11 @@ impl RustAudioPlayer {
                     }
 
                     let final_frame = float_frame.floor() as usize;
-                    sample_index.store(final_frame * src_ch, Ordering::SeqCst);
-                    // Update position
-                    if decoded.sample_rate > 0 {
-                        let mut st = state.lock().unwrap();
-                        st.current_position = final_frame as f64 / decoded.sample_rate as f64;
-                    }
+                    sample_index.store(final_frame * src_ch, Ordering::Release);
                     buf
                 } else {
+                    let zero_buf = vec![0u8; available * bytes_per_frame];
+                    let _ = render.write_to_device(available, &zero_buf, None);
                     continue;
                 }
             };
@@ -1911,7 +1883,7 @@ pub fn open_exclusive_stream(
     let mut client = device.get_iaudioclient().map_err(|e| e.to_string())?;
 
     let period = client
-        .calculate_aligned_period_near(250_000, Some(128), &fmt.wave_fmt)
+        .calculate_aligned_period_near(500_000, Some(128), &fmt.wave_fmt)
         .map_err(|e| e.to_string())?;
 
     let mode = StreamMode::EventsExclusive { period_hns: period };
