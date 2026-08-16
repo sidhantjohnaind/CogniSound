@@ -1,0 +1,72 @@
+[package]
+name = "rust_server"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "rust_server"
+path = "src/main.rs"
+
+[[bin]]
+name = "db_scanner"
+path = "src/bin/db_scanner.rs"
+
+[[bin]]
+name = "classify_tracks"
+path = "src/bin/classify_tracks.rs"
+
+[[bin]]
+name = "compute_melody_twins"
+path = "src/bin/compute_melody_twins.rs"
+
+[[bin]]
+name = "stem_analyzer"
+path = "src/bin/stem_analyzer.rs"
+
+[[bin]]
+name = "generate_timelines"
+path = "src/bin/generate_timelines.rs"
+
+[dependencies]
+tokio = { version = "1.43", features = ["full"] }
+socket2 = "0.5"
+axum = { version = "0.8", features = ["ws", "macros"] }
+tower-http = { version = "0.6", features = ["cors", "fs", "trace"] }
+rusqlite = { version = "0.33", features = ["bundled"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+urlencoding = "2.1"
+reqwest = { version = "0.12", features = ["json"] }
+cpal = "0.15"
+symphonia = { version = "0.5", features = ["all"] }
+libloading = "0.8"
+anyhow = "1.0"
+chrono = "0.4"
+lofty = "0.21"
+notify = "7"
+
+toml = "0.8"
+rayon = "1.10"
+walkdir = "2.5"
+rustfft = "6.2"
+md5 = "0.7"
+
+[target.'cfg(all(windows, target_arch = "x86_64"))'.dependencies]
+wasapi = "0.23"
+windows = { version = "0.51", features = ["Win32_System_Com", "Win32_Foundation", "Win32_Media_Audio", "Win32_Devices_Properties"] }
+ort = { version = "2.0.0-rc.9", features = ["cuda", "directml"] }
+
+[target.'cfg(all(windows, not(target_arch = "x86_64")))'.dependencies]
+wasapi = "0.23"
+windows = { version = "0.51", features = ["Win32_System_Com", "Win32_Foundation", "Win32_Media_Audio", "Win32_Devices_Properties"] }
+
+[target.'cfg(all(not(windows), any(target_arch = "x86_64", target_arch = "aarch64")))'.dependencies]
+ort = { version = "2.0.0-rc.9", features = ["cuda"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+panic = "abort"

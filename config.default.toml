@@ -1,0 +1,25 @@
+# ==============================================================================
+# Sonar Music Player - Configuration File
+# ==============================================================================
+
+# Web server listening port (default: 80)
+port = 80
+
+# Path to your music library directory (relative or absolute)
+# e.g., "E:/music", "/home/user/Music", or "../"
+music_dir = "E:/music"
+
+# Path to SQLite database file
+db_path = "music_library.db"
+
+# Album artwork cache directory
+art_cache_dir = ".art_cache"
+
+# Machine Learning ONNX models directory (optional)
+models_dir = ".lyrics-tools"
+
+# Number of parallel worker threads for Rayon (leave empty for adaptive 75% CPU core budget)
+# rayon_threads = 12
+
+# Enable bit-perfect WASAPI Exclusive Mode on Windows (default: true)
+wasapi_exclusive = true

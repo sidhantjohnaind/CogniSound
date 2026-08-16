@@ -1,0 +1,2702 @@
+import { ScrollView, ListView, Slider, Button, LineEdit, ComboBox } from "std-widgets.slint";
+
+export struct TrackData {
+    id: int,
+    title: string,
+    artist: string,
+    album: string,
+    duration: string,
+    vocal-status: string,
+    cover: image,
+}
+
+export struct AlbumData {
+    name: string,
+    track-count: int,
+    cover: image,
+}
+
+export struct PlaylistData {
+    name: string,
+    track-count: int,
+}
+
+export struct SectionData {
+    label: string,
+    start: float,
+    end: float,
+    percentage: float,
+    color: color,
+}
+
+export struct HeatmapCell {
+    cell-color: color,
+    cell-opacity: float,
+    is-active: bool,
+    cell-index: int,
+}
+
+export struct HeatmapRow {
+    label: string,
+    presence: string,
+    accent-color: color,
+    cells: [HeatmapCell],
+}
+
+export struct LyricLine {
+    text: string,
+    time-ms: int,
+    active: bool,
+}
+
+export struct ThemeExplorerItem {
+    is-header: bool,
+    family-id: int,
+    track-count: int,
+    expanded: bool,
+    track-id: int,
+    title: string,
+    artist: string,
+    album: string,
+    duration: string,
+    vocal-status: string,
+    importance: string,
+    similarity: string,
+    is-favorite: bool,
+}
+
+export global PlaybackState {
+    in-out property <bool> is-playing: false;
+    in-out property <[float]> eq-spectrum-bars: [0.35, 0.72, 0.45, 0.88, 0.55, 0.92, 0.38, 0.65, 0.82, 0.48, 0.76, 0.30];
+}
+
+component NavItem inherits Rectangle {
+    in property <string> label;
+    in property <string> icon;
+    in property <bool> active;
+    in property <color> accent;
+    in property <color> text-color;
+    in property <color> text-muted;
+    callback clicked();
+
+    height: 42px;
+    border-radius: 8px;
+    background: active ? accent.with-alpha(0.12) : (touch.has-hover ? #ffffff0a : transparent);
+    border-width: 1px;
+    border-color: active ? accent.with-alpha(0.25) : (touch.has-hover ? #ffffff10 : transparent);
+
+    touch := TouchArea {
+        clicked => { root.clicked(); }
+    }
+
+    HorizontalLayout {
+        padding-left: 13px;
+        padding-right: 12px;
+        spacing: 11px;
+
+        Rectangle {
+            width: 18px;
+            height: 18px;
+            
+            property <color> icon-col: active ? accent : text-muted;
+
+            if (icon == "📁" || icon == "library") : Path {
+                width: 14px; height: 12px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 1 2 L 5 2 L 7 4 L 13 4 L 13 11 L 1 11 Z";
+            }
+            if (icon == "💽" || icon == "albums") : Path {
+                width: 14px; height: 14px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 7 1 A 6 6 0 1 0 7 13 A 6 6 0 1 0 7 1 M 7 5 A 2 2 0 1 0 7 9 A 2 2 0 1 0 7 5";
+            }
+            if (icon == "🧬" || icon == "themes") : Path {
+                width: 14px; height: 14px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 3 1 Q 7 7 11 13 M 11 1 Q 7 7 3 13 M 4 4 L 10 4 M 4 10 L 10 10";
+            }
+            if (icon == "📊" || icon == "stats") : Path {
+                width: 14px; height: 12px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 2 11 L 2 7 M 6 11 L 6 3 M 10 11 L 10 1 M 14 11 L 14 5";
+            }
+            if (icon == "📜" || icon == "queue") : Path {
+                width: 14px; height: 12px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 1 2 L 13 2 M 1 6 L 13 6 M 1 10 L 9 10";
+            }
+            if (icon == "⭐" || icon == "favorites") : Path {
+                width: 14px; height: 14px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                fill: active ? accent : transparent;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 7 1 L 9 5 L 13 6 L 10 9 L 11 13 L 7 11 L 3 13 L 4 9 L 1 6 L 5 5 Z";
+            }
+            if (icon == "🎵" || icon == "playlists") : Path {
+                width: 12px; height: 14px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 4 12 A 2 2 0 1 0 4 8 A 2 2 0 1 0 4 12 M 4 8 L 4 2 L 10 1 L 10 4 L 4 5";
+            }
+            if (icon == "🎛️" || icon == "dsp") : Path {
+                width: 14px; height: 14px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 2 3 L 12 3 M 5 1 L 5 5 M 2 7 L 12 7 M 9 5 L 9 9 M 2 11 L 12 11 M 4 9 L 4 13";
+            }
+            if (icon == "🎨" || icon == "themes-config") : Path {
+                width: 14px; height: 14px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 7 1 Q 13 1 13 7 Q 13 11 10 11 Q 9 11 9 10 Q 9 9 8 9 Q 7 9 7 10 Q 7 13 4 12 Q 1 11 1 7 Q 1 1 7 1";
+            }
+            if (icon == "⚙️" || icon == "settings") : Path {
+                width: 14px; height: 14px;
+                x: (parent.width - self.width)/2; y: (parent.height - self.height)/2;
+                stroke: icon-col; stroke-width: 1.5px;
+                commands: "M 7 4 A 3 3 0 1 0 7 10 A 3 3 0 1 0 7 4 M 7 1 L 7 3 M 7 11 L 7 13 M 1 7 L 3 7 M 11 7 L 13 7 M 3 3 L 4.5 4.5 M 9.5 9.5 L 11 11 M 11 3 L 9.5 4.5 M 4.5 9.5 L 3 11";
+            }
+        }
+
+        Text {
+            text: label;
+            color: active ? text-color : (touch.has-hover ? text-color : text-muted);
+            font-size: 13px;
+            font-weight: active ? 800 : 600;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+    }
+}
+
+component SectionLabel inherits Text {
+    in property <string> label;
+    text: label;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+component Chip inherits Rectangle {
+    in property <string> label;
+    in property <bool> active: false;
+    in property <length> chip-width: 88px;
+    in property <color> accent;
+    in property <color> text-color;
+    in property <color> muted-color;
+    callback clicked();
+
+    width: chip-width;
+    height: 34px;
+    border-radius: 17px;
+    background: active ? accent.with-alpha(0.15) : (touch.has-hover ? #ffffff0b : #ffffff04);
+    border-width: 1px;
+    border-color: active ? accent.with-alpha(0.3) : (touch.has-hover ? #ffffff15 : #ffffff08);
+
+    touch := TouchArea { clicked => { root.clicked(); } }
+
+    Text {
+        text: label;
+        color: active ? accent : muted-color;
+        font-size: 12px;
+        font-weight: 800;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+component IconButton inherits Rectangle {
+    in property <string> label;
+    in property <string> icon-id: "";
+    in property <bool> prominent: false;
+    in property <bool> active: false;
+    in property <color> accent;
+    in property <color> text-color;
+    in property <color> muted-color;
+    callback clicked();
+
+    width: prominent ? 54px : 42px;
+    height: prominent ? 54px : 42px;
+    border-radius: prominent ? 27px : 21px;
+    background: prominent ? accent : (active ? accent.with-alpha(0.15) : (touch.has-hover ? #ffffff0a : transparent));
+    border-width: active && !prominent ? 1px : 0px;
+    border-color: active && !prominent ? accent.with-alpha(0.3) : transparent;
+
+    touch := TouchArea { clicked => { root.clicked(); } }
+
+    property <color> icon-color: prominent ? #06100d : (active ? accent : (touch.has-hover ? text-color : muted-color));
+
+    if (icon-id == "") : Text {
+        text: label;
+        color: icon-color;
+        font-size: prominent ? 19px : 16px;
+        font-weight: 900;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    if (icon-id == "play") : Path {
+        width: 14px;
+        height: 16px;
+        x: (parent.width - self.width)/2 + 2px;
+        y: (parent.height - self.height)/2;
+        fill: icon-color;
+        commands: "M 0 0 L 14 8 L 0 16 Z";
+    }
+
+    if (icon-id == "pause") : HorizontalLayout {
+        width: 12px;
+        height: 14px;
+        x: (parent.width - self.width)/2;
+        y: (parent.height - self.height)/2;
+        spacing: 4px;
+        alignment: center;
+        Rectangle { width: 4px; height: 14px; background: icon-color; border-radius: 1px; }
+        Rectangle { width: 4px; height: 14px; background: icon-color; border-radius: 1px; }
+    }
+
+    if (icon-id == "prev") : HorizontalLayout {
+        width: 15px;
+        height: 12px;
+        x: (parent.width - self.width)/2;
+        y: (parent.height - self.height)/2;
+        spacing: 3px;
+        alignment: center;
+        Rectangle { width: 3px; height: 12px; background: icon-color; border-radius: 1px; }
+        Path {
+            width: 9px;
+            height: 12px;
+            fill: icon-color;
+            commands: "M 9 0 L 0 6 L 9 12 Z";
+        }
+    }
+
+    if (icon-id == "next") : HorizontalLayout {
+        width: 15px;
+        height: 12px;
+        x: (parent.width - self.width)/2;
+        y: (parent.height - self.height)/2;
+        spacing: 3px;
+        alignment: center;
+        Path {
+            width: 9px;
+            height: 12px;
+            fill: icon-color;
+            commands: "M 0 0 L 9 6 L 0 12 Z";
+        }
+        Rectangle { width: 3px; height: 12px; background: icon-color; border-radius: 1px; }
+    }
+
+    if (icon-id == "shuffle") : Path {
+        width: 16px;
+        height: 14px;
+        x: (parent.width - self.width)/2;
+        y: (parent.height - self.height)/2;
+        stroke: icon-color;
+        stroke-width: 2px;
+        commands: "M 0 2 L 6 2 L 10 12 L 16 12 M 12 12 L 16 12 L 16 8 M 0 12 L 6 12 L 10 2 L 16 2 M 12 2 L 16 2 L 16 6";
+    }
+
+    if (icon-id == "repeat") : Path {
+        width: 16px;
+        height: 14px;
+        x: (parent.width - self.width)/2;
+        y: (parent.height - self.height)/2;
+        stroke: icon-color;
+        stroke-width: 2px;
+        commands: "M 2 8 L 2 4 Q 2 2 4 2 L 12 2 Q 14 2 14 4 L 14 6 M 12 4 L 14 6 L 16 4 M 14 6 L 14 10 Q 14 12 12 12 L 4 12 Q 2 12 2 10 L 2 8 M 4 10 L 2 8 L 0 10";
+    }
+
+    if (icon-id == "repeat-one") : Rectangle {
+        width: 18px;
+        height: 14px;
+        x: (parent.width - self.width)/2;
+        y: (parent.height - self.height)/2;
+        Path {
+            width: 18px;
+            height: 14px;
+            stroke: icon-color;
+            stroke-width: 1.5px;
+            commands: "M 2 8 L 2 4 Q 2 2 4 2 L 14 2 Q 16 2 16 4 L 16 6 M 14 4 L 16 6 L 18 4 M 16 6 L 16 10 Q 16 12 14 12 L 4 12 Q 2 12 2 10 L 2 8 M 4 10 L 2 8 L 0 10";
+        }
+        Text {
+            text: "1";
+            color: icon-color;
+            font-size: 8px;
+            font-weight: 800;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+
+    if (icon-id == "fullscreen") : Path {
+        width: 14px;
+        height: 14px;
+        stroke: icon-color;
+        stroke-width: 2px;
+        commands: "M 0 4 L 0 0 L 4 0 M 10 0 L 14 0 L 14 4 M 14 10 L 14 14 L 10 14 M 4 14 L 0 14 L 0 10";
+    }
+
+    if (icon-id == "favorite") : Path {
+        width: 14px;
+        height: 14px;
+        fill: icon-color;
+        commands: "M 7 0 L 9.2 4.5 L 14 5.2 L 10.5 8.6 L 11.3 13.5 L 7 11.2 L 2.7 13.5 L 3.5 8.6 L 0 5.2 L 4.8 4.5 Z";
+    }
+
+    if (icon-id == "dislike") : Path {
+        width: 14px;
+        height: 14px;
+        x: (parent.width - self.width)/2;
+        y: (parent.height - self.height)/2;
+        stroke: icon-color;
+        stroke-width: 1.8px;
+        fill: active ? icon-color : transparent;
+        commands: "M 2 7 L 5 7 L 8 13 L 9 13 L 9 7 L 13 7 Q 14 7 14 6 L 13 1 L 6 1 Q 5 1 5 2 L 5 7 Z";
+    }
+
+    if (icon-id == "remove" || icon-id == "close") : Path {
+        width: 12px;
+        height: 12px;
+        x: (parent.width - self.width)/2;
+        y: (parent.height - self.height)/2;
+        stroke: icon-color;
+        stroke-width: 2px;
+        commands: "M 1 1 L 11 11 M 11 1 L 1 11";
+    }
+
+    if (icon-id == "add" || icon-id == "plus") : Path {
+        width: 12px;
+        height: 12px;
+        x: (parent.width - self.width)/2;
+        y: (parent.height - self.height)/2;
+        stroke: icon-color;
+        stroke-width: 2px;
+        commands: "M 6 1 L 6 11 M 1 6 L 11 6";
+    }
+}
+
+component TrackRow inherits Rectangle {
+    in property <TrackData> track;
+    in property <bool> active;
+    in property <color> accent;
+    in property <color> text-color;
+    in property <color> muted-color;
+    in property <color> low-color;
+    callback play(int);
+
+    height: 48px;
+    border-radius: 8px;
+    background: active ? accent.with-alpha(0.14) : (touch.has-hover ? #ffffff08 : transparent);
+    border-width: active ? 1px : 0px;
+    border-color: active ? accent.with-alpha(0.35) : transparent;
+
+    touch := TouchArea {
+        clicked => { root.play(track.id); }
+    }
+
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        spacing: 14px;
+
+        Rectangle {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: @linear-gradient(135deg, accent.with-alpha(0.34) 0%, #34d39920 100%);
+            clip: true;
+
+            if (track.cover.width > 0) : Image {
+                source: track.cover;
+                width: 100%;
+                height: 100%;
+                image-fit: cover;
+            }
+
+            if (track.cover.width == 0) : Text {
+                text: active ? "▶" : "🎵";
+                color: active ? accent : muted-color;
+                font-size: 11px;
+                font-weight: 900;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+
+        VerticalLayout {
+            width: 38%;
+            spacing: 2px;
+            HorizontalLayout {
+                spacing: 6px;
+                alignment: start;
+                Text {
+                    text: track.title;
+                    color: text-color;
+                    font-size: 13px;
+                    font-weight: 800;
+                    overflow: elide;
+                }
+                if active && PlaybackState.is-playing : HorizontalLayout {
+                    spacing: 2px;
+                    alignment: center;
+                    width: 20px;
+                    height: 12px;
+                    
+                    Rectangle { width: 2.5px; height: 12px; clip: true; Rectangle { width: 2.5px; height: 12px; y: 12px - Math.max(3px, PlaybackState.eq-spectrum-bars[0] * 12px); background: accent; border-radius: 1px; animate y { duration: 120ms; easing: ease-in-out; } } }
+                    Rectangle { width: 2.5px; height: 12px; clip: true; Rectangle { width: 2.5px; height: 12px; y: 12px - Math.max(3px, PlaybackState.eq-spectrum-bars[3] * 12px); background: accent; border-radius: 1px; animate y { duration: 120ms; easing: ease-in-out; } } }
+                    Rectangle { width: 2.5px; height: 12px; clip: true; Rectangle { width: 2.5px; height: 12px; y: 12px - Math.max(3px, PlaybackState.eq-spectrum-bars[6] * 12px); background: accent; border-radius: 1px; animate y { duration: 120ms; easing: ease-in-out; } } }
+                    Rectangle { width: 2.5px; height: 12px; clip: true; Rectangle { width: 2.5px; height: 12px; y: 12px - Math.max(3px, PlaybackState.eq-spectrum-bars[9] * 12px); background: accent; border-radius: 1px; animate y { duration: 120ms; easing: ease-in-out; } } }
+                }
+            }
+            Text {
+                text: (track.vocal-status == "unknown" || track.vocal-status == "") ? track.artist : track.vocal-status;
+                color: muted-color;
+                font-size: 11px;
+                font-weight: 600;
+                overflow: elide;
+            }
+        }
+
+        Text {
+            width: 24%;
+            text: track.artist;
+            color: muted-color;
+            font-size: 12px;
+            font-weight: 600;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+
+        Text {
+            width: 27%;
+            text: track.album;
+            color: muted-color;
+            font-size: 12px;
+            font-weight: 600;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+
+        Text {
+            width: 50px;
+            text: track.duration;
+            color: low-color;
+            font-size: 11px;
+            font-weight: 700;
+            horizontal-alignment: right;
+            vertical-alignment: center;
+        }
+    }
+}
+
+component TrackCard inherits Rectangle {
+    in property <TrackData> track;
+    in property <bool> active;
+    in property <color> accent;
+    in property <color> text-color;
+    in property <color> muted-color;
+    callback play(int);
+
+    width: 156px;
+    height: 196px;
+    border-radius: 8px;
+    background: active ? #121820 : (touch.has-hover ? #161d27 : #10151d);
+    border-width: active ? 2px : 1px;
+    border-color: active ? #38bdf8 : #ffffff10;
+    clip: true;
+
+    touch := TouchArea {
+        clicked => { root.play(track.id); }
+    }
+
+    VerticalLayout {
+        padding: 10px;
+        spacing: 8px;
+
+        Rectangle {
+            height: 134px;
+            border-radius: 6px;
+            background: @linear-gradient(135deg, #1f2937 0%, #0f172a 100%);
+            clip: true;
+
+            if (track.cover.width > 0) : Image {
+                source: track.cover;
+                width: 100%;
+                height: 100%;
+                image-fit: cover;
+            }
+
+            if (track.cover.width == 0) : Text {
+                text: "SONAR";
+                color: accent;
+                font-size: 17px;
+                font-weight: 900;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+
+        Text {
+            text: track.title;
+            color: active ? accent : text-color;
+            font-size: 12.5px;
+            font-weight: 900;
+            overflow: elide;
+        }
+
+        Text {
+            text: track.artist;
+            color: muted-color;
+            font-size: 11px;
+            font-weight: 650;
+            overflow: elide;
+        }
+    }
+}
+
+component InfoCard inherits Rectangle {
+    in property <string> title;
+    in property <string> value;
+    in property <color> accent;
+    in property <color> text-color;
+    in property <color> muted-color;
+
+    height: 88px;
+    border-radius: 8px;
+    background: #ffffff06;
+    border-width: 1px;
+    border-color: #ffffff0c;
+
+    VerticalLayout {
+        padding: 14px;
+        spacing: 6px;
+        Text {
+            text: title;
+            color: muted-color;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+        }
+        Text {
+            text: value;
+            color: accent;
+            font-size: 25px;
+            font-weight: 900;
+        }
+    }
+}
+
+
+component ThemeCard inherits Rectangle {
+    in property <string> name;
+    in property <color> bg-start;
+    in property <color> bg-end;
+    in property <color> panel-bg;
+    in property <color> accent;
+    in property <color> border-col;
+    in property <color> text-col;
+    in property <bool> active;
+    callback clicked;
+
+    width: 250px;
+    height: 150px;
+    border-radius: 10px;
+    border-width: active ? 2px : 1px;
+    border-color: active ? accent : border-col;
+    clip: true;
+    background: @linear-gradient(135deg, bg-start 0%, bg-end 100%);
+
+    TouchArea {
+        clicked => { root.clicked(); }
+    }
+
+    // Visual mockup of the player interface
+    HorizontalLayout {
+        padding: 8px;
+        spacing: 6px;
+
+        // Mock Sidebar
+        Rectangle {
+            width: 48px;
+            border-radius: 6px;
+            background: panel-bg.with-alpha(0.85);
+            border-width: 1px;
+            border-color: border-col;
+            VerticalLayout {
+                padding: 6px;
+                spacing: 6px;
+                alignment: start;
+                // Mock avatar/logo
+                Rectangle { width: 14px; height: 14px; border-radius: 4px; background: accent; }
+                // Mock nav lines
+                Rectangle { width: 30px; height: 4px; border-radius: 2px; background: text-col.with-alpha(0.3); }
+                Rectangle { width: 24px; height: 4px; border-radius: 2px; background: text-col.with-alpha(0.15); }
+                Rectangle { width: 26px; height: 4px; border-radius: 2px; background: text-col.with-alpha(0.15); }
+            }
+        }
+
+        // Mock Main Content Area
+        VerticalLayout {
+            spacing: 6px;
+            // Mock Header
+            Rectangle {
+                height: 20px;
+                border-radius: 4px;
+                background: panel-bg.with-alpha(0.48);
+                border-width: 1px;
+                border-color: border-col;
+                HorizontalLayout {
+                    padding-left: 6px;
+                    padding-right: 6px;
+                    alignment: start;
+                    Rectangle { width: 60px; height: 10px; border-radius: 2px; background: text-col.with-alpha(0.1); }
+                }
+            }
+            // Mock Content Body
+            Rectangle {
+                vertical-stretch: 1;
+                border-radius: 4px;
+                background: panel-bg.with-alpha(0.3);
+                border-width: 1px;
+                border-color: border-col;
+                VerticalLayout {
+                    padding: 8px;
+                    spacing: 4px;
+                    alignment: center;
+                    // Player visualizer preview
+                    HorizontalLayout {
+                        spacing: 2px;
+                        alignment: center;
+                        Rectangle { width: 3px; height: active ? 14px : 10px; background: accent; border-radius: 1px; }
+                        Rectangle { width: 3px; height: active ? 20px : 14px; background: accent; border-radius: 1px; }
+                        Rectangle { width: 3px; height: active ? 16px : 12px; background: accent; border-radius: 1px; }
+                        Rectangle { width: 3px; height: active ? 22px : 16px; background: accent; border-radius: 1px; }
+                        Rectangle { width: 3px; height: active ? 12px : 8px; background: accent; border-radius: 1px; }
+                    }
+                }
+            }
+        }
+    }
+
+    // Overlay Card Title
+    Rectangle {
+        y: parent.height - 32px;
+        width: 100%;
+        height: 32px;
+        background: #00000080;
+        HorizontalLayout {
+            padding-left: 12px;
+            padding-right: 12px;
+            alignment: space-between;
+            Text {
+                text: name;
+                color: #ffffff;
+                font-size: 12px;
+                font-weight: 800;
+                vertical-alignment: center;
+            }
+            if (active) : Text {
+                text: "✓";
+                color: accent;
+                font-size: 14px;
+                font-weight: 900;
+                vertical-alignment: center;
+            }
+        }
+    }
+}
+
+component CustomSlider inherits Rectangle {
+    in-out property <float> value: 0.0;
+    in property <float> minimum: 0.0;
+    in property <float> maximum: 100.0;
+    in property <color> accent: #10b981;
+    callback changed(float);
+
+    height: 18px;
+    background: transparent;
+
+    touch := TouchArea {
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.left && (event.kind == PointerEventKind.down || event.kind == PointerEventKind.move)) {
+                let clamped_x = Math.max(0px, Math.min(parent.width, self.mouse-x));
+                let pct = clamped_x / parent.width;
+                root.value = root.minimum + pct * (root.maximum - root.minimum);
+                root.changed(root.value);
+            }
+        }
+    }
+
+    // Track background
+    Rectangle {
+        y: (parent.height - 4px) / 2;
+        height: 4px;
+        border-radius: 2px;
+        background: #ffffff12;
+        width: 100%;
+    }
+
+    // Filled track
+    Rectangle {
+        x: 0px;
+        y: (parent.height - 4px) / 2;
+        height: 4px;
+        border-radius: 2px;
+        background: root.accent;
+        width: (root.value - root.minimum) / (root.maximum - root.minimum) * parent.width;
+        drop-shadow-blur: 8px;
+        drop-shadow-color: root.accent.with-alpha(0.5);
+    }
+
+    // Handle (knob)
+    Rectangle {
+        x: ((root.value - root.minimum) / (root.maximum - root.minimum) * parent.width) - (touch.has-hover ? 7px : 5px);
+        y: (parent.height - (touch.has-hover ? 14px : 10px)) / 2;
+        width: touch.has-hover ? 14px : 10px;
+        height: touch.has-hover ? 14px : 10px;
+        border-radius: touch.has-hover ? 7px : 5px;
+        background: #ffffff;
+        border-width: 1px;
+        border-color: #00000030;
+        opacity: touch.has-hover ? 1.0 : 0.0;
+        drop-shadow-blur: 6px;
+        drop-shadow-color: #00000080;
+        animate width { duration: 150ms; easing: ease-out; }
+        animate height { duration: 150ms; easing: ease-out; }
+        animate border-radius { duration: 150ms; easing: ease-out; }
+        animate x { duration: 150ms; easing: ease-out; }
+        animate y { duration: 150ms; easing: ease-out; }
+    }
+}
+
+export component AppWindow inherits Window {
+    title: "Sonar - Soundtrack Intelligence Workstation";
+    min-width: 1440px;
+    min-height: 820px;
+    preferred-width: 1440px;
+    preferred-height: 820px;
+    background: @linear-gradient(135deg, theme-bg-start 0%, theme-bg-end 100%);
+    default-font-family: "Plus Jakarta Sans";
+
+    in-out property <color> theme-bg-start: #080a10;
+    in-out property <color> theme-bg-end: #080a10;
+    in-out property <color> theme-panel-bg: #10141ea6;
+    in-out property <color> theme-border: #ffffff0d;
+    in-out property <color> theme-text: #f8fafc;
+    in-out property <color> theme-text-muted: #94a3b8;
+    in-out property <color> theme-text-low: #64748b;
+    in-out property <color> theme-accent: #10b981;
+    in-out property <color> theme-accent-glow: #10b9811c;
+    in-out property <string> theme-name: "dark";
+
+    in-out property <string> active-tab: "library";
+    in-out property <string> drawer-tab: "intel";
+    in-out property <bool> vocal-filter-on: false;
+    in-out property <bool> instrumental-filter-on: false;
+
+    // Search advanced filters and pagination
+    in-out property <string> search-query: "";
+    in-out property <int> current-page: 1;
+    in-out property <int> total-pages: 1;
+    in-out property <int> total-tracks: 0;
+    in-out property <int> page-limit: 50;
+
+    in-out property <string> character-filter: "All Vibes";
+    in-out property <string> key-filter: "Key: All";
+    in-out property <string> emotion-filter: "Mood: All";
+    in-out property <string> scale-filter: "Scale: All";
+
+    in-out property <string> sort-column: "title";
+    in-out property <string> sort-order: "asc";
+
+    in-out property <bool> is-grid-view: true;
+    in-out property <bool> advanced-filters-visible: false;
+
+    // Advanced instrument score filters
+    in-out property <string> strings-filter: "Strings: All";
+    in-out property <string> keyboards-filter: "Keyboards: All";
+    in-out property <string> drums-filter: "Percussion: All";
+    in-out property <string> complexity-filter: "Arrangement: All";
+    in-out property <string> choir-filter: "Choir: All";
+    in-out property <string> winds-filter: "Woodwinds: All";
+    in-out property <string> brass-filter: "Brass: All";
+
+    // Audio attribute sliders
+    in-out property <float> cinematicness-filter: 0.0;
+    in-out property <float> electronicness-filter: 0.0;
+    in-out property <float> nostalgia-filter: 0.0;
+    in-out property <float> bpm-filter: 0.0;
+
+    in-out property <[TrackData]> tracks: [];
+    in-out property <[TrackData]> queue-tracks: [];
+    in-out property <[AlbumData]> albums: [];
+    in-out property <[TrackData]> album-tracks: [];
+    in-out property <[TrackData]> themed-tracks: [];
+    in-out property <[TrackData]> favorite-tracks: [];
+    in-out property <[TrackData]> history-tracks: [];
+    in-out property <[PlaylistData]> playlists: [];
+    in-out property <[TrackData]> playlist-tracks: [];
+
+    in-out property <string> selected-album: "";
+    in-out property <string> selected-playlist: "";
+
+    in-out property <string> active-title: "No Track Playing";
+    in-out property <string> active-artist: "Select a song from the library";
+    in-out property <string> active-album: "";
+    in-out property <string> active-duration: "00:00";
+    in-out property <string> active-position: "00:00";
+    in-out property <float> playhead-progress: 0.0;
+    in-out property <bool> is-playing <=> PlaybackState.is-playing;
+    in-out property <int> volume: 80;
+    in-out property <bool> shuffle-mode: false;
+    in-out property <string> repeat-mode: "none";
+
+    in-out property <string> lyrics: "No lyrics loaded.";
+    in-out property <string> bpm: "N/A";
+    in-out property <string> key-sig: "N/A";
+    in-out property <string> dynamic-range: "N/A";
+    in-out property <string> vocal-ratio: "N/A";
+
+    in-out property <float> dsp-bass: 50.0;
+    in-out property <float> dsp-mid: 50.0;
+    in-out property <float> dsp-vocals: 50.0;
+    in-out property <float> dsp-air: 50.0;
+    in-out property <float> dsp-warmth: 50.0;
+    in-out property <float> dsp-width: 50.0;
+    in-out property <bool> dsp-bypass: false;
+    in-out property <bool> dsp-stereo-expanded: true;
+    in-out property <bool> dsp-eq-expanded: true;
+    in-out property <bool> dsp-warmth-expanded: true;
+
+    in-out property <int> active-track-id: -1;
+    in-out property <bool> active-track-favorite: false;
+    in-out property <bool> active-track-disliked: false;
+    in-out property <bool> fs-overlay-visible: false;
+    in-out property <image> cover-image;
+    in-out property <image> radar-image;
+    in-out property <image> waves-image;
+    in-out property <[float]> eq-spectrum-bars <=> PlaybackState.eq-spectrum-bars;
+    in-out property <[SectionData]> section-timeline: [];
+    in-out property <[HeatmapRow]> instrument-heatmap: [];
+    in-out property <[LyricLine]> lyric-lines: [];
+    in-out property <[ThemeExplorerItem]> theme-explorer-items: [];
+    in-out property <string> playlist-view-mode: "current";
+
+    in-out property <int> stat-total: 0;
+    in-out property <int> stat-vocal: 0;
+    in-out property <int> stat-instrumental: 0;
+
+    callback play-track(int);
+    callback toggle-play();
+    callback next-track();
+    callback prev-track();
+    callback toggle-theme-family(int);
+    callback seek-to-time(int);
+    callback seek(float);
+    callback change-volume(int);
+    callback clear-queue();
+    callback toggle-shuffle();
+    callback toggle-repeat();
+    callback trigger-search();
+    callback select-album(string);
+    callback select-playlist(string);
+    callback create-playlist(string);
+    callback toggle-favorite(int);
+    callback toggle-dislike(int);
+    callback add-to-playlist(int, string);
+    callback remove-from-playlist(int, string);
+    callback theme-changed(string);
+    callback update-dsp(float, float, float, float, float, float, bool);
+    callback toggle-fullscreen();
+
+    VerticalLayout {
+        width: parent.width;
+        height: parent.height;
+        spacing: 0;
+
+        HorizontalLayout {
+            vertical-stretch: 1;
+            spacing: 0;
+
+            Rectangle {
+                width: 240px;
+                background: theme-panel-bg.with-alpha(0.94);
+
+            VerticalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                padding-top: 22px;
+                padding-bottom: 12px;
+                spacing: 13px;
+
+                HorizontalLayout {
+                    height: 42px;
+                    spacing: 12px;
+
+                    Rectangle {
+                        width: 38px;
+                        height: 38px;
+                        border-radius: 10px;
+                        background: @linear-gradient(135deg, theme-accent 0%, #34d399 100%);
+                        Text {
+                            text: "~";
+                            color: #06100d;
+                            font-size: 22px;
+                            font-weight: 900;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    VerticalLayout {
+                        spacing: 0px;
+                        Text { text: "Sonar"; color: theme-text; font-size: 18px; font-weight: 900; }
+                        Text { text: "WORKSTATION"; color: theme-accent; font-size: 10px; font-weight: 900; letter-spacing: 1.5px; }
+                    }
+                }
+
+                Rectangle { height: 10px; }
+                SectionLabel { label: "EXPLORE"; }
+                NavItem { icon: "📁"; label: "Library Explorer"; active: active-tab == "library"; accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "library"; } }
+                NavItem { icon: "💽"; label: "Album Explorer"; active: active-tab == "albums" || (active-tab == "themes" && selected-album != ""); accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "albums"; } }
+                NavItem { icon: "🧬"; label: "Theme Explorer"; active: active-tab == "themes" && selected-album == ""; accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "themes"; selected-album = ""; } }
+                NavItem { icon: "📊"; label: "Library Stats"; active: active-tab == "stats"; accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "stats"; } }
+
+                Rectangle { height: 2px; }
+                SectionLabel { label: "MY MUSIC"; }
+                NavItem { icon: "📜"; label: "Playback Queue"; active: active-tab == "queue"; accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "queue"; } }
+                NavItem { icon: "⭐"; label: "Favorites & History"; active: active-tab == "favorites"; accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "favorites"; } }
+                NavItem { icon: "🎵"; label: "Playlist Builder"; active: active-tab == "playlists"; accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "playlists"; } }
+
+                Rectangle { height: 2px; }
+                SectionLabel { label: "SOUND & LOOK"; }
+                NavItem { icon: "🎛️"; label: "DSP Effects"; active: active-tab == "dsp"; accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "dsp"; } }
+                NavItem { icon: "🎨"; label: "Visual Themes"; active: active-tab == "themes-config"; accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "themes-config"; } }
+
+                Rectangle { vertical-stretch: 1; }
+                NavItem { icon: "⚙️"; label: "Settings"; active: active-tab == "settings"; accent: theme-accent; text-color: theme-text; text-muted: theme-text-muted; clicked => { active-tab = "settings"; } }
+
+                Rectangle { height: 1px; background: theme-border; }
+                HorizontalLayout {
+                    height: 30px;
+                    Text { text: "v1.6.0 native"; color: theme-text-low; font-size: 10.5px; font-weight: 700; vertical-alignment: center; }
+                    Rectangle { horizontal-stretch: 1; }
+                    Button { text: theme-name == "light" ? "dark" : "light"; clicked => {
+                        if (theme-name == "light") {
+                            theme-bg-start = #080a10; theme-bg-end = #080a10; theme-panel-bg = #10141ea6; theme-border = #ffffff0d; theme-text = #f8fafc; theme-text-muted = #94a3b8; theme-text-low = #64748b; theme-accent = #10b981; theme-accent-glow = #10b9811c; theme-name = "dark"; theme-changed("dark");
+                        } else {
+                            theme-bg-start = #f9fafb; theme-bg-end = #f3f4f6; theme-panel-bg = #ffffff; theme-border = #e5e7eb; theme-text = #1c1917; theme-text-muted = #44403c; theme-text-low = #78716c; theme-accent = #8b5cf6; theme-accent-glow = #8b5cf61c; theme-name = "light"; theme-changed("light");
+                        }
+                    } }
+                }
+            }
+        }
+
+        Rectangle { width: 1px; background: theme-border; }
+
+        VerticalLayout {
+            horizontal-stretch: 1;
+            spacing: 0;
+
+            Rectangle {
+                height: 66px;
+                background: theme-bg-start.with-alpha(0.48);
+                border-width: 0px;
+
+                HorizontalLayout {
+                    padding-left: 22px;
+                    padding-right: 18px;
+                    padding-top: 14px;
+                    padding-bottom: 14px;
+                    spacing: 12px;
+
+                    Button { text: "☰"; width: 34px; height: 34px; }
+
+                    search := LineEdit {
+                        preferred-width: 240px;
+                        horizontal-stretch: 1;
+                        height: 38px;
+                        placeholder-text: "Search Soundtrack Intelligence...";
+                        text: root.search-query;
+                        edited(text) => {
+                            root.search-query = text;
+                            root.current-page = 1;
+                            root.trigger-search();
+                        }
+                    }
+
+                    Rectangle { horizontal-stretch: 1; }
+
+                    Chip { label: "Visualizer"; chip-width: 94px; active: root.fs-overlay-visible; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { root.fs-overlay-visible = !root.fs-overlay-visible; } }
+                    Chip { label: "All"; chip-width: 54px; active: !vocal-filter-on && !instrumental-filter-on; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { vocal-filter-on = false; instrumental-filter-on = false; root.current-page = 1; root.trigger-search(); } }
+                    Chip { label: "Vocals"; chip-width: 78px; active: vocal-filter-on; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { vocal-filter-on = true; instrumental-filter-on = false; root.current-page = 1; root.trigger-search(); } }
+                    Chip { label: "Instrumentals"; chip-width: 124px; active: instrumental-filter-on; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { vocal-filter-on = false; instrumental-filter-on = true; root.current-page = 1; root.trigger-search(); } }
+                }
+            }
+
+            Rectangle { height: 1px; background: theme-border; }
+
+            if active-tab == "library" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 16px;
+
+                HorizontalLayout {
+                    height: 38px;
+                    spacing: 10px;
+                    Text { text: "Library Explorer"; color: theme-text; font-size: 19px; font-weight: 900; vertical-alignment: center; }
+                    Rectangle { horizontal-stretch: 1; }
+                    Button {
+                        width: 38px;
+                        text: root.is-grid-view ? "☰" : "☷";
+                        clicked => { root.is-grid-view = !root.is-grid-view; }
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: 8px;
+                    
+                    ComboBox {
+                        width: 125px;
+                        model: ["All Vibes", "Calm / Smooth", "Moderate", "Dynamic / Fluctuating"];
+                        current-value: root.character-filter;
+                        selected(val) => { root.character-filter = val; root.current-page = 1; root.trigger-search(); }
+                    }
+                    ComboBox {
+                        width: 80px;
+                        model: ["Key: All", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+                        current-value: root.key-filter;
+                        selected(val) => { root.key-filter = val; root.current-page = 1; root.trigger-search(); }
+                    }
+                    ComboBox {
+                        width: 100px;
+                        model: ["Mood: All", "Nostalgic", "Dark", "Happy", "Dreamy", "Sad", "Suspenseful"];
+                        current-value: root.emotion-filter;
+                        selected(val) => { root.emotion-filter = val; root.current-page = 1; root.trigger-search(); }
+                    }
+                    ComboBox {
+                        width: 85px;
+                        model: ["Scale: All", "Major", "Minor"];
+                        current-value: root.scale-filter;
+                        selected(val) => { root.scale-filter = val; root.current-page = 1; root.trigger-search(); }
+                    }
+                    ComboBox {
+                        width: 125px;
+                        model: ["Sort by Title", "Sort by Artist", "Sort by Album", "Sort by Duration", "Sort by Smoothness", "Sort by Play Count", "Sort by Affinity"];
+                        current-value: (root.sort-column == "title" ? "Sort by Title" : (root.sort-column == "artist" ? "Sort by Artist" : (root.sort-column == "album" ? "Sort by Album" : (root.sort-column == "duration" ? "Sort by Duration" : (root.sort-column == "audio_smoothness" ? "Sort by Smoothness" : (root.sort-column == "play_count" ? "Sort by Play Count" : (root.sort-column == "user_affinity" ? "Sort by Affinity" : "Sort by Title")))))));
+                        selected(val) => {
+                            if (val == "Sort by Title") { root.sort-column = "title"; }
+                            if (val == "Sort by Artist") { root.sort-column = "artist"; }
+                            if (val == "Sort by Album") { root.sort-column = "album"; }
+                            if (val == "Sort by Duration") { root.sort-column = "duration"; }
+                            if (val == "Sort by Smoothness") { root.sort-column = "audio_smoothness"; }
+                            if (val == "Sort by Play Count") { root.sort-column = "play_count"; }
+                            if (val == "Sort by Affinity") { root.sort-column = "user_affinity"; }
+                            root.current-page = 1;
+                            root.trigger-search();
+                        }
+                    }
+                    Button {
+                        width: 32px;
+                        text: root.sort-order == "asc" ? "▲" : "▼";
+                        clicked => { root.sort-order = (root.sort-order == "asc" ? "desc" : "asc"); root.current-page = 1; root.trigger-search(); }
+                    }
+                    Button {
+                        text: root.advanced-filters-visible ? "Hide Filters" : "Advanced";
+                        clicked => { root.advanced-filters-visible = !root.advanced-filters-visible; }
+                    }
+                }
+
+                if root.advanced-filters-visible : Rectangle {
+                    height: 146px;
+                    background: #1e293b40;
+                    border-radius: 8px;
+                    border-width: 1px;
+                    border-color: theme-border;
+
+                    VerticalLayout {
+                        padding: 16px;
+                        spacing: 12px;
+
+                        HorizontalLayout {
+                            spacing: 12px;
+                            VerticalLayout {
+                                spacing: 4px;
+                                Text { text: "Strings"; color: theme-text-muted; font-size: 11px; font-weight: 800; }
+                                ComboBox {
+                                    width: 140px;
+                                    model: ["Strings: All", "High Strings", "Mod Strings", "Low Strings"];
+                                    current-value: root.strings-filter;
+                                    selected(val) => { root.strings-filter = val; root.current-page = 1; root.trigger-search(); }
+                                }
+                            }
+                            VerticalLayout {
+                                spacing: 4px;
+                                Text { text: "Keyboards"; color: theme-text-muted; font-size: 11px; font-weight: 800; }
+                                ComboBox {
+                                    width: 140px;
+                                    model: ["Keyboards: All", "High Keyboards", "Mod Keyboards", "Low Keyboards"];
+                                    current-value: root.keyboards-filter;
+                                    selected(val) => { root.keyboards-filter = val; root.current-page = 1; root.trigger-search(); }
+                                }
+                            }
+                            VerticalLayout {
+                                spacing: 4px;
+                                Text { text: "Percussion"; color: theme-text-muted; font-size: 11px; font-weight: 800; }
+                                ComboBox {
+                                    width: 140px;
+                                    model: ["Percussion: All", "High Percussion", "Mod Percussion", "Low Percussion"];
+                                    current-value: root.drums-filter;
+                                    selected(val) => { root.drums-filter = val; root.current-page = 1; root.trigger-search(); }
+                                }
+                            }
+                            VerticalLayout {
+                                spacing: 4px;
+                                Text { text: "Arrangement"; color: theme-text-muted; font-size: 11px; font-weight: 800; }
+                                ComboBox {
+                                    width: 140px;
+                                    model: ["Arrangement: All", "Complex Arrangement", "Simple Arrangement"];
+                                    current-value: root.complexity-filter;
+                                    selected(val) => { root.complexity-filter = val; root.current-page = 1; root.trigger-search(); }
+                                }
+                            }
+                        }
+
+                        HorizontalLayout {
+                            spacing: 12px;
+                            VerticalLayout {
+                                spacing: 4px;
+                                Text { text: "Choir"; color: theme-text-muted; font-size: 11px; font-weight: 800; }
+                                ComboBox {
+                                    width: 140px;
+                                    model: ["Choir: All", "High Choir", "Mod Choir", "Low Choir"];
+                                    current-value: root.choir-filter;
+                                    selected(val) => { root.choir-filter = val; root.current-page = 1; root.trigger-search(); }
+                                }
+                            }
+                            VerticalLayout {
+                                spacing: 4px;
+                                Text { text: "Woodwinds"; color: theme-text-muted; font-size: 11px; font-weight: 800; }
+                                ComboBox {
+                                    width: 140px;
+                                    model: ["Woodwinds: All", "High Woodwinds", "Mod Woodwinds", "Low Woodwinds"];
+                                    current-value: root.winds-filter;
+                                    selected(val) => { root.winds-filter = val; root.current-page = 1; root.trigger-search(); }
+                                }
+                            }
+                            VerticalLayout {
+                                spacing: 4px;
+                                Text { text: "Brass"; color: theme-text-muted; font-size: 11px; font-weight: 800; }
+                                ComboBox {
+                                    width: 140px;
+                                    model: ["Brass: All", "High Brass", "Mod Brass", "Low Brass"];
+                                    current-value: root.brass-filter;
+                                    selected(val) => { root.brass-filter = val; root.current-page = 1; root.trigger-search(); }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if root.advanced-filters-visible : Rectangle {
+                    height: 110px;
+                    border-radius: 8px;
+                    background: #0f172a72;
+                    border-width: 1px;
+                    border-color: #ffffff0c;
+
+                    VerticalLayout {
+                        padding-left: 14px;
+                        padding-right: 14px;
+                        padding-top: 8px;
+                        padding-bottom: 8px;
+                        spacing: 8px;
+
+                        HorizontalLayout {
+                            spacing: 18px;
+                            VerticalLayout {
+                                width: 140px;
+                                spacing: 3px;
+                                Text { text: "Cinematicness " + Math.round(root.cinematicness-filter) + "%"; color: theme-text-muted; font-size: 10px; font-weight: 800; }
+                                CustomSlider { minimum: 0; maximum: 100; value <=> root.cinematicness-filter; changed(v) => { root.cinematicness-filter = v; root.current-page = 1; root.trigger-search(); } }
+                            }
+                            Rectangle { horizontal-stretch: 1; }
+                            VerticalLayout {
+                                width: 140px;
+                                spacing: 3px;
+                                Text { text: "Electronic " + Math.round(root.electronicness-filter) + "%"; color: theme-text-muted; font-size: 10px; font-weight: 800; }
+                                CustomSlider { minimum: 0; maximum: 100; value <=> root.electronicness-filter; changed(v) => { root.electronicness-filter = v; root.current-page = 1; root.trigger-search(); } }
+                            }
+                        }
+
+                        HorizontalLayout {
+                            spacing: 18px;
+                            VerticalLayout {
+                                width: 140px;
+                                spacing: 3px;
+                                Text { text: "Nostalgia " + Math.round(root.nostalgia-filter) + "%"; color: theme-text-muted; font-size: 10px; font-weight: 800; }
+                                CustomSlider { minimum: 0; maximum: 100; value <=> root.nostalgia-filter; changed(v) => { root.nostalgia-filter = v; root.current-page = 1; root.trigger-search(); } }
+                            }
+                            Rectangle { horizontal-stretch: 1; }
+                            VerticalLayout {
+                                width: 140px;
+                                spacing: 3px;
+                                Text { text: "BPM Target " + Math.round(root.bpm-filter); color: theme-text-muted; font-size: 10px; font-weight: 800; }
+                                CustomSlider { minimum: 0; maximum: 200; value <=> root.bpm-filter; changed(v) => { root.bpm-filter = v; root.current-page = 1; root.trigger-search(); } }
+                            }
+                        }
+                    }
+                }
+
+                if (!root.is-grid-view) : ListView {
+                    vertical-stretch: 1;
+                    preferred-height: 100px;
+                    for track in tracks : TrackRow {
+                        track: track;
+                        active: track.id == active-track-id;
+                        accent: theme-accent;
+                        text-color: theme-text;
+                        muted-color: theme-text-muted;
+                        low-color: theme-text-low;
+                        play(id) => { play-track(id); }
+                    }
+                }
+                if (root.is-grid-view) : ScrollView {
+                    vertical-stretch: 1;
+                    preferred-height: 100px;
+                    Rectangle {
+                        property <int> cols: Math.max(1, Math.floor((parent.width - 20px) / 175px));
+                        height: Math.max(215px, Math.floor((tracks.length + cols - 1) / cols) * 215px + 20px);
+                        for track[index] in tracks : TrackCard {
+                            x: Math.mod(index, cols) * 175px + 10px;
+                            y: Math.floor(index / cols) * 215px + 10px;
+                            track: track;
+                            active: track.id == active-track-id;
+                            accent: theme-accent;
+                            text-color: theme-text;
+                            muted-color: theme-text-muted;
+                            play(id) => { play-track(id); }
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    height: 38px;
+                    spacing: 12px;
+                    padding-top: 4px;
+
+                    Text {
+                        text: "Showing page " + root.current-page + " of " + root.total-pages + " (" + root.total-tracks + " tracks)";
+                        color: theme-text-muted;
+                        font-size: 12px;
+                        vertical-alignment: center;
+                    }
+
+                    Rectangle { horizontal-stretch: 1; }
+
+                    Button {
+                        text: "First";
+                        enabled: root.current-page > 1;
+                        clicked => { root.current-page = 1; root.trigger-search(); }
+                    }
+                    Button {
+                        text: "Prev";
+                        enabled: root.current-page > 1;
+                        clicked => { root.current-page = root.current-page - 1; root.trigger-search(); }
+                    }
+                    Button {
+                        text: "Next";
+                        enabled: root.current-page < root.total-pages;
+                        clicked => { root.current-page = root.current-page + 1; root.trigger-search(); }
+                    }
+                    Button {
+                        text: "Last";
+                        enabled: root.current-page < root.total-pages;
+                        clicked => { root.current-page = root.total-pages; root.trigger-search(); }
+                    }
+                }
+            }
+
+            if active-tab == "albums" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 16px;
+                Text { text: "Album Explorer"; color: theme-text; font-size: 22px; font-weight: 900; }
+                ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 6px;
+                        for album in albums : Rectangle {
+                            height: 56px;
+                            border-radius: 8px;
+                            background: album-touch.has-hover ? #ffffff0d : #ffffff06;
+                            border-width: 1px;
+                            border-color: album-touch.has-hover ? theme-accent.with-alpha(0.45) : #ffffff0c;
+
+                            album-touch := TouchArea {
+                                clicked => { selected-album = album.name; select-album(album.name); active-tab = "themes"; }
+                            }
+
+                            HorizontalLayout {
+                                padding-left: 16px;
+                                padding-right: 16px;
+                                spacing: 14px;
+
+                                Rectangle {
+                                     width: 38px;
+                                     height: 38px;
+                                     border-radius: 6px;
+                                     clip: true;
+                                     background: #ffffff06;
+
+                                     if (album.cover.width > 0) : Image {
+                                         source: album.cover;
+                                         width: 100%;
+                                         height: 100%;
+                                         image-fit: cover;
+                                     }
+
+                                     if (album.cover.width == 0) : Text {
+                                         text: "♫";
+                                         color: theme-accent;
+                                         font-size: 16px;
+                                         font-weight: 900;
+                                         horizontal-alignment: center;
+                                         vertical-alignment: center;
+                                     }
+                                 }
+
+                                VerticalLayout {
+                                    alignment: center;
+                                    spacing: 2px;
+                                    Text { text: album.name; color: theme-text; font-size: 13px; font-weight: 800; overflow: elide; }
+                                    Text { text: album.track-count + " tracks"; color: theme-text-muted; font-size: 11px; font-weight: 600; }
+                                }
+
+                                Rectangle { horizontal-stretch: 1; }
+
+                                Text { text: "→"; color: theme-text-muted; font-size: 16px; font-weight: 600; vertical-alignment: center; }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if active-tab == "themes" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 14px;
+                
+                HorizontalLayout {
+                    spacing: 12px;
+                    alignment: start;
+                    Text { text: "Theme Explorer"; color: theme-text; font-size: 22px; font-weight: 900; }
+                }
+                
+                Text { text: "Soundtrack theme families and variation clusters grouped by neural melody similarity."; color: theme-text-muted; font-size: 13px; }
+                
+                ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 8px;
+                        
+                        for item in theme-explorer-items : VerticalLayout {
+                            if item.is-header : Rectangle {
+                                height: 50px;
+                                background: item.expanded ? theme-panel-bg : theme-panel-bg.with-alpha(0.6);
+                                border-radius: 8px;
+                                border-width: 1px;
+                                border-color: item.expanded ? theme-accent : theme-border;
+                                
+                                HorizontalLayout {
+                                    padding-left: 16px;
+                                    padding-right: 16px;
+                                    spacing: 12px;
+                                    
+                                    Text {
+                                        text: "🧬";
+                                        font-size: 18px;
+                                        vertical-alignment: center;
+                                    }
+                                    Text {
+                                        text: "Theme Cluster Family #" + item.family-id;
+                                        color: theme-text;
+                                        font-size: 15px;
+                                        font-weight: 700;
+                                        vertical-alignment: center;
+                                    }
+                                    Text {
+                                        text: item.track-count + " variations";
+                                        color: theme-text-muted;
+                                        font-size: 13px;
+                                        vertical-alignment: center;
+                                    }
+                                    Rectangle { horizontal-stretch: 1; }
+                                    Text {
+                                        text: item.expanded ? "▲" : "▼";
+                                        color: theme-text-muted;
+                                        font-size: 12px;
+                                        vertical-alignment: center;
+                                    }
+                                }
+                                
+                                TouchArea {
+                                    clicked => {
+                                        toggle-theme-family(item.family-id);
+                                    }
+                                }
+                            }
+                            
+                            if !item.is-header : Rectangle {
+                                height: 52px;
+                                background: theme-panel-bg.with-alpha(0.2);
+                                border-radius: 6px;
+                                border-width: 1px;
+                                border-color: theme-border.with-alpha(0.4);
+                                
+                                HorizontalLayout {
+                                    padding-left: 36px; // Indented variation node
+                                    padding-right: 16px;
+                                    spacing: 12px;
+                                    
+                                    // Play icon / button
+                                    Rectangle {
+                                        width: 28px;
+                                        height: 28px;
+                                        border-radius: 14px;
+                                        background: theme-border;
+                                        y: (parent.height - 28px) / 2;
+                                        
+                                        Text {
+                                            text: "▶";
+                                            color: theme-accent;
+                                            font-size: 10px;
+                                            horizontal-alignment: center;
+                                            vertical-alignment: center;
+                                            x: 1px; // visually center triangle
+                                        }
+                                        
+                                        TouchArea {
+                                            clicked => {
+                                                play-track(item.track-id);
+                                            }
+                                        }
+                                    }
+                                    
+                                    VerticalLayout {
+                                        alignment: center;
+                                        spacing: 2px;
+                                        Text {
+                                            text: item.title;
+                                            color: theme-text;
+                                            font-size: 14px;
+                                            font-weight: 700;
+                                        }
+                                        Text {
+                                            text: item.artist + " • " + item.vocal-status;
+                                            color: theme-text-muted;
+                                            font-size: 11.5px;
+                                        }
+                                    }
+                                    
+                                    Rectangle { horizontal-stretch: 1; }
+                                    
+                                    // Badges
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        y: (parent.height - 20px) / 2;
+                                        
+                                        Rectangle {
+                                            background: #3b82f620;
+                                            border-radius: 4px;
+                                            border-width: 1px;
+                                            border-color: #3b82f640;
+                                            
+                                            VerticalLayout {
+                                                padding-left: 6px;
+                                                padding-right: 6px;
+                                                alignment: center;
+                                                Text {
+                                                    text: item.importance;
+                                                    color: #60a5fa;
+                                                    font-size: 11px;
+                                                    font-weight: 700;
+                                                    vertical-alignment: center;
+                                                }
+                                            }
+                                        }
+                                        
+                                        if item.similarity != "" : Rectangle {
+                                            background: #10b98120;
+                                            border-radius: 4px;
+                                            border-width: 1px;
+                                            border-color: #10b98140;
+                                            
+                                            VerticalLayout {
+                                                padding-left: 6px;
+                                                padding-right: 6px;
+                                                alignment: center;
+                                                Text {
+                                                    text: item.similarity;
+                                                    color: #34d399;
+                                                    font-size: 11px;
+                                                    font-weight: 700;
+                                                    vertical-alignment: center;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if theme-explorer-items.length == 0 : VerticalLayout {
+                            alignment: center;
+                            spacing: 14px;
+                            padding-top: 80px;
+                            Rectangle {
+                                width: 64px;
+                                height: 64px;
+                                border-radius: 32px;
+                                background: theme-border;
+                                Text { text: "🧬"; font-size: 28px; horizontal-alignment: center; vertical-alignment: center; }
+                            }
+                            Text { text: "No soundtrack theme families found"; color: theme-text; font-size: 16px; font-weight: 800; horizontal-alignment: center; }
+                            Text { text: "Please scan your library or launch the server to populate the Theme Explorer."; color: theme-text-muted; font-size: 12px; horizontal-alignment: center; }
+                        }
+                    }
+                }
+            }
+
+            if active-tab == "queue" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 14px;
+                HorizontalLayout {
+                    Text { text: "Playback Queue"; color: theme-text; font-size: 22px; font-weight: 900; }
+                    Rectangle { horizontal-stretch: 1; }
+                    Button { text: "Clear Queue"; clicked => { clear-queue(); } }
+                }
+                ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 5px;
+                        for track in queue-tracks : TrackRow {
+                            track: track; active: track.id == active-track-id; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; low-color: theme-text-low;
+                            play(id) => { play-track(id); }
+                        }
+                    }
+                }
+            }
+
+            if active-tab == "favorites" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 14px;
+                Text { text: "Favorites & History"; color: theme-text; font-size: 22px; font-weight: 900; }
+                ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 16px;
+                        Text { text: "FAVORITES"; color: theme-text-low; font-size: 11px; font-weight: 900; letter-spacing: 1px; }
+                        for track in favorite-tracks : TrackRow { track: track; active: track.id == active-track-id; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; low-color: theme-text-low; play(id) => { play-track(id); } }
+                        Text { text: "HISTORY"; color: theme-text-low; font-size: 11px; font-weight: 900; letter-spacing: 1px; }
+                        for track in history-tracks : TrackRow { track: track; active: track.id == active-track-id; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; low-color: theme-text-low; play(id) => { play-track(id); } }
+                    }
+                }
+            }
+
+            if active-tab == "playlists" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 16px;
+                Text { text: "Playlist Builder"; color: theme-text; font-size: 22px; font-weight: 900; }
+                HorizontalLayout {
+                    spacing: 12px;
+                    new-playlist := LineEdit { placeholder-text: "New playlist name"; height: 38px; }
+                    Button { text: "Create"; clicked => { create-playlist(new-playlist.text); } }
+                }
+                HorizontalLayout {
+                    spacing: 24px;
+                    vertical-stretch: 1;
+
+                    // Left Column: Playlists List
+                    VerticalLayout {
+                        width: 320px;
+                        spacing: 8px;
+                        Text { text: "Your Playlists"; color: theme-text-muted; font-size: 13px; font-weight: 800; }
+                        ScrollView {
+                            vertical-stretch: 1;
+                            VerticalLayout {
+                                spacing: 7px;
+                                for playlist in playlists : Rectangle {
+                                    height: 46px; border-radius: 8px;
+                                    background: selected-playlist == playlist.name ? theme-accent.with-alpha(0.12) : #ffffff06;
+                                    border-width: 1px;
+                                    border-color: selected-playlist == playlist.name ? theme-accent.with-alpha(0.35) : #ffffff0c;
+                                    TouchArea { clicked => { selected-playlist = playlist.name; select-playlist(playlist.name); } }
+                                    HorizontalLayout { padding: 12px; Text { text: playlist.name; color: theme-text; font-weight: 800; } Rectangle { horizontal-stretch: 1; } Text { text: playlist.track-count + " tracks"; color: theme-text-muted; } }
+                                }
+                            }
+                        }
+                    }
+
+                    // Divider
+                    Rectangle {
+                        width: 1px;
+                        background: theme-border;
+                    }
+
+                    // Right Column: Playlist Tracks
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        spacing: 12px;
+                        if (selected-playlist != "") : VerticalLayout {
+                            spacing: 10px;
+                            vertical-stretch: 1;
+                            HorizontalLayout {
+                                alignment: space-between;
+                                Text { text: selected-playlist; color: theme-text; font-size: 18px; font-weight: 800; }
+                                Text { text: playlist-tracks.length + " Tracks"; color: theme-text-muted; font-size: 13px; }
+                            }
+                            
+                            // Sub-tabs to choose track source
+                            HorizontalLayout {
+                                spacing: 8px;
+                                height: 32px;
+                                Chip { label: "Playlist Tracks"; active: playlist-view-mode == "current"; chip-width: 120px; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { playlist-view-mode = "current"; } }
+                                Chip { label: "Add from Search"; active: playlist-view-mode == "search"; chip-width: 120px; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { playlist-view-mode = "search"; } }
+                                Chip { label: "Add from Play Queue"; active: playlist-view-mode == "queue"; chip-width: 160px; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { playlist-view-mode = "queue"; } }
+                            }
+
+                            if (playlist-view-mode == "current") : ScrollView {
+                                vertical-stretch: 1;
+                                VerticalLayout {
+                                    spacing: 6px;
+                                    for track in playlist-tracks : HorizontalLayout {
+                                        spacing: 8px;
+                                        TrackRow {
+                                            horizontal-stretch: 1;
+                                            track: track;
+                                            active: track.id == active-track-id;
+                                            accent: theme-accent;
+                                            text-color: theme-text;
+                                            muted-color: theme-text-muted;
+                                            low-color: theme-text-low;
+                                            play(id) => { play-track(id); }
+                                        }
+                                        IconButton {
+                                            icon-id: "remove";
+                                            accent: #ef4444;
+                                            text-color: theme-text;
+                                            muted-color: theme-text-muted;
+                                            clicked => { remove-from-playlist(track.id, selected-playlist); }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (playlist-view-mode == "search") : ScrollView {
+                                vertical-stretch: 1;
+                                VerticalLayout {
+                                    spacing: 6px;
+                                    for track in tracks : HorizontalLayout {
+                                        spacing: 8px;
+                                        TrackRow {
+                                            horizontal-stretch: 1;
+                                            track: track;
+                                            active: track.id == active-track-id;
+                                            accent: theme-accent;
+                                            text-color: theme-text;
+                                            muted-color: theme-text-muted;
+                                            low-color: theme-text-low;
+                                            play(id) => { play-track(id); }
+                                        }
+                                        IconButton {
+                                            icon-id: "add";
+                                            accent: theme-accent;
+                                            text-color: theme-text;
+                                            muted-color: theme-text-muted;
+                                            clicked => { add-to-playlist(track.id, selected-playlist); }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (playlist-view-mode == "queue") : ScrollView {
+                                vertical-stretch: 1;
+                                VerticalLayout {
+                                    spacing: 6px;
+                                    for track in queue-tracks : HorizontalLayout {
+                                        spacing: 8px;
+                                        TrackRow {
+                                            horizontal-stretch: 1;
+                                            track: track;
+                                            active: track.id == active-track-id;
+                                            accent: theme-accent;
+                                            text-color: theme-text;
+                                            muted-color: theme-text-muted;
+                                            low-color: theme-text-low;
+                                            play(id) => { play-track(id); }
+                                        }
+                                        IconButton {
+                                            icon-id: "add";
+                                            accent: theme-accent;
+                                            text-color: theme-text;
+                                            muted-color: theme-text-muted;
+                                            clicked => { add-to-playlist(track.id, selected-playlist); }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (selected-playlist == "") : Rectangle {
+                            vertical-stretch: 1;
+                            background: #ffffff02;
+                            border-radius: 8px;
+                            border-width: 1px;
+                            border-color: theme-border;
+                            VerticalLayout {
+                                alignment: center;
+                                spacing: 10px;
+                                Text { text: "Select a playlist to view tracks"; color: theme-text-muted; font-size: 14px; horizontal-alignment: center; }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if active-tab == "dsp" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 16px;
+
+                Text { text: "DSP Effects"; color: theme-text; font-size: 22px; font-weight: 900; }
+
+                // Master DSP Toggle Card
+                Rectangle {
+                    height: 60px;
+                    background: theme-panel-bg;
+                    border-radius: 10px;
+                    border-width: 1px;
+                    border-color: dsp-bypass ? theme-border : theme-accent.with-alpha(0.35);
+                    HorizontalLayout {
+                        padding-left: 18px;
+                        padding-right: 18px;
+                        alignment: space-between;
+                        HorizontalLayout {
+                            spacing: 14px;
+                            Rectangle {
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 4px;
+                                background: dsp-bypass ? theme-text-low : theme-accent;
+                            }
+                            Text { text: "DSP AUDIO PROCESSOR"; font-size: 13px; font-weight: 900; color: theme-text; vertical-alignment: center; }
+                        }
+                        // Pill toggle switch
+                        Rectangle {
+                            width: 48px;
+                            height: 26px;
+                            border-radius: 13px;
+                            background: dsp-bypass ? #1e293b : theme-accent;
+                            animate background { duration: 180ms; }
+                            Rectangle {
+                                x: dsp-bypass ? 3px : 23px;
+                                y: 3px;
+                                width: 20px;
+                                height: 20px;
+                                border-radius: 10px;
+                                background: #ffffff;
+                                animate x { duration: 180ms; easing: ease-in-out; }
+                            }
+                            TouchArea { clicked => { update-dsp(dsp-bass, dsp-mid, dsp-vocals, dsp-air, dsp-warmth, dsp-width, !dsp-bypass); } }
+                        }
+                    }
+                }
+
+                ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 10px;
+
+                        // 1. Stereo Enhancer
+                        Rectangle {
+                            height: stereo-vl.preferred-height + 32px;
+                            background: theme-panel-bg;
+                            border-radius: 10px;
+                            border-width: 1px;
+                            border-color: theme-border;
+                            stereo-vl := VerticalLayout {
+                                x: 16px;
+                                y: 16px;
+                                width: parent.width - 32px;
+                                spacing: 12px;
+                                HorizontalLayout {
+                                    spacing: 10px;
+                                    alignment: start;
+                                    Rectangle {
+                                        width: 8px; height: 8px; border-radius: 4px;
+                                        background: dsp-bypass ? theme-text-low : theme-accent;
+                                    }
+                                    Text { text: "Stereo Enhancer"; font-size: 13px; font-weight: 800; color: theme-text; horizontal-stretch: 1; }
+                                    Text {
+                                        text: dsp-stereo-expanded ? "▲" : "▼";
+                                        font-size: 11px;
+                                        color: theme-text-muted;
+                                    }
+                                    TouchArea { clicked => { dsp-stereo-expanded = !dsp-stereo-expanded; } }
+                                }
+                                if dsp-stereo-expanded : VerticalLayout {
+                                    opacity: dsp-bypass ? 0.4 : 1.0;
+                                    spacing: 6px;
+                                    HorizontalLayout {
+                                        Text { text: "Width"; font-size: 12px; color: theme-text-muted; font-weight: 700; horizontal-stretch: 1; }
+                                        Text { text: Math.round(dsp-width) + "%"; font-size: 12px; color: theme-accent; font-weight: 800; }
+                                    }
+                                    CustomSlider { value <=> dsp-width; minimum: 0; maximum: 200; accent: theme-accent; changed(v) => { if (!dsp-bypass) { update-dsp(dsp-bass, dsp-mid, dsp-vocals, dsp-air, dsp-warmth, v, dsp-bypass); } } }
+                                }
+                            }
+                        }
+
+                        // 2. Dynamic EQ / Equalizer
+                        Rectangle {
+                            height: eq-vl.preferred-height + 32px;
+                            background: theme-panel-bg;
+                            border-radius: 10px;
+                            border-width: 1px;
+                            border-color: theme-border;
+                            eq-vl := VerticalLayout {
+                                x: 16px;
+                                y: 16px;
+                                width: parent.width - 32px;
+                                spacing: 12px;
+                                HorizontalLayout {
+                                    spacing: 10px;
+                                    alignment: start;
+                                    Rectangle {
+                                        width: 8px; height: 8px; border-radius: 4px;
+                                        background: dsp-bypass ? theme-text-low : theme-accent;
+                                    }
+                                    Text { text: "Dynamic EQ / Equalizer"; font-size: 13px; font-weight: 800; color: theme-text; horizontal-stretch: 1; }
+                                    Text { text: dsp-eq-expanded ? "▲" : "▼"; font-size: 11px; color: theme-text-muted; }
+                                    TouchArea { clicked => { dsp-eq-expanded = !dsp-eq-expanded; } }
+                                }
+                                if dsp-eq-expanded : VerticalLayout {
+                                    opacity: dsp-bypass ? 0.4 : 1.0;
+                                    spacing: 14px;
+                                    HorizontalLayout {
+                                        spacing: 24px;
+                                        VerticalLayout {
+                                            spacing: 6px;
+                                            horizontal-stretch: 1;
+                                            HorizontalLayout {
+                                                Text { text: "Bass"; font-size: 12px; color: theme-text-muted; font-weight: 700; horizontal-stretch: 1; }
+                                                Text { text: (dsp-bass > 0 ? "+" : "") + Math.round(dsp-bass) + " dB"; font-size: 12px; color: theme-accent; font-weight: 800; }
+                                            }
+                                            CustomSlider { value <=> dsp-bass; minimum: -30; maximum: 30; accent: theme-accent; changed(v) => { if (!dsp-bypass) { update-dsp(v, dsp-mid, dsp-vocals, dsp-air, dsp-warmth, dsp-width, dsp-bypass); } } }
+                                        }
+                                        VerticalLayout {
+                                            spacing: 6px;
+                                            horizontal-stretch: 1;
+                                            HorizontalLayout {
+                                                Text { text: "Mids"; font-size: 12px; color: theme-text-muted; font-weight: 700; horizontal-stretch: 1; }
+                                                Text { text: (dsp-mid > 0 ? "+" : "") + Math.round(dsp-mid) + " dB"; font-size: 12px; color: theme-accent; font-weight: 800; }
+                                            }
+                                            CustomSlider { value <=> dsp-mid; minimum: -30; maximum: 30; accent: theme-accent; changed(v) => { if (!dsp-bypass) { update-dsp(dsp-bass, v, dsp-vocals, dsp-air, dsp-warmth, dsp-width, dsp-bypass); } } }
+                                        }
+                                    }
+                                    HorizontalLayout {
+                                        spacing: 24px;
+                                        VerticalLayout {
+                                            spacing: 6px;
+                                            horizontal-stretch: 1;
+                                            HorizontalLayout {
+                                                Text { text: "Vocals Presence"; font-size: 12px; color: theme-text-muted; font-weight: 700; horizontal-stretch: 1; }
+                                                Text { text: (dsp-vocals > 0 ? "+" : "") + Math.round(dsp-vocals) + " dB"; font-size: 12px; color: theme-accent; font-weight: 800; }
+                                            }
+                                            CustomSlider { value <=> dsp-vocals; minimum: -30; maximum: 30; accent: theme-accent; changed(v) => { if (!dsp-bypass) { update-dsp(dsp-bass, dsp-mid, v, dsp-air, dsp-warmth, dsp-width, dsp-bypass); } } }
+                                        }
+                                        VerticalLayout {
+                                            spacing: 6px;
+                                            horizontal-stretch: 1;
+                                            HorizontalLayout {
+                                                Text { text: "High Frequency Air"; font-size: 12px; color: theme-text-muted; font-weight: 700; horizontal-stretch: 1; }
+                                                Text { text: (dsp-air > 0 ? "+" : "") + Math.round(dsp-air) + " dB"; font-size: 12px; color: theme-accent; font-weight: 800; }
+                                            }
+                                            CustomSlider { value <=> dsp-air; minimum: -30; maximum: 30; accent: theme-accent; changed(v) => { if (!dsp-bypass) { update-dsp(dsp-bass, dsp-mid, dsp-vocals, v, dsp-warmth, dsp-width, dsp-bypass); } } }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // 3. Tube Warmth
+                        Rectangle {
+                            height: warmth-vl.preferred-height + 32px;
+                            background: theme-panel-bg;
+                            border-radius: 10px;
+                            border-width: 1px;
+                            border-color: theme-border;
+                            warmth-vl := VerticalLayout {
+                                x: 16px;
+                                y: 16px;
+                                width: parent.width - 32px;
+                                spacing: 12px;
+                                HorizontalLayout {
+                                    spacing: 10px;
+                                    alignment: start;
+                                    Rectangle {
+                                        width: 8px; height: 8px; border-radius: 4px;
+                                        background: dsp-bypass ? theme-text-low : theme-accent;
+                                    }
+                                    Text { text: "Tube Warmth"; font-size: 13px; font-weight: 800; color: theme-text; horizontal-stretch: 1; }
+                                    Text { text: dsp-warmth-expanded ? "▲" : "▼"; font-size: 11px; color: theme-text-muted; }
+                                    TouchArea { clicked => { dsp-warmth-expanded = !dsp-warmth-expanded; } }
+                                }
+                                if dsp-warmth-expanded : VerticalLayout {
+                                    opacity: dsp-bypass ? 0.4 : 1.0;
+                                    spacing: 6px;
+                                    HorizontalLayout {
+                                        Text { text: "Warmth Factor"; font-size: 12px; color: theme-text-muted; font-weight: 700; horizontal-stretch: 1; }
+                                        Text { text: Math.round(dsp-warmth) + "%"; font-size: 12px; color: theme-accent; font-weight: 800; }
+                                    }
+                                    CustomSlider { value <=> dsp-warmth; minimum: 0; maximum: 100; accent: theme-accent; changed(v) => { if (!dsp-bypass) { update-dsp(dsp-bass, dsp-mid, dsp-vocals, dsp-air, v, dsp-width, dsp-bypass); } } }
+                                }
+                            }
+                        }
+
+                        // 4. Recommendation Card
+                        Rectangle {
+                            height: rec-vl.preferred-height + 28px;
+                            background: theme-accent.with-alpha(0.06);
+                            border-radius: 10px;
+                            border-width: 1px;
+                            border-color: theme-accent.with-alpha(0.2);
+                            rec-vl := VerticalLayout {
+                                x: 14px;
+                                y: 14px;
+                                width: parent.width - 28px;
+                                spacing: 5px;
+                                Text { text: "Recommended DSP Chain Profile"; font-size: 11px; font-weight: 800; color: theme-text-muted; }
+                                Text { text: "Suggested: Dynamic Enhancements"; font-size: 13px; font-weight: 800; color: theme-accent; }
+                                Text { text: "✓ Active: Default Balanced flat preset configured via native DSP processor."; font-size: 11px; color: theme-text-low; }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if active-tab == "stats" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 18px;
+                Text { text: "Library Stats"; color: theme-text; font-size: 22px; font-weight: 900; }
+                GridLayout {
+                    spacing: 16px;
+                    Row {
+                        InfoCard { title: "TOTAL DB TRACKS"; value: stat-total; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; }
+                        InfoCard { title: "VOCAL TRACKS"; value: stat-vocal; accent: #34d399; text-color: theme-text; muted-color: theme-text-muted; }
+                    }
+                    Row {
+                        InfoCard { title: "INSTRUMENTALS"; value: stat-instrumental; accent: #f59e0b; text-color: theme-text; muted-color: theme-text-muted; }
+                        Rectangle { height: 88px; background: transparent; }
+                    }
+                }
+            }
+
+            if active-tab == "themes-config" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 16px;
+                Text { text: "Visual Themes"; color: theme-text; font-size: 22px; font-weight: 900; }
+                Text { text: "Choose a native theme palette for the workstation."; color: theme-text-muted; font-size: 13px; }
+                ScrollView {
+                    vertical-stretch: 1;
+                    GridLayout {
+                        spacing: 16px;
+                        Row {
+                            ThemeCard { name: "Sonar Dark"; bg-start: #080a10; bg-end: #0d111b; panel-bg: #0a0c12; accent: #10b981; border-col: #1e293b; text-col: #f8fafc; active: theme-name == "dark"; clicked => { theme-bg-start = #080a10; theme-bg-end = #0d111b; theme-panel-bg = #0a0c12; theme-border = #1e293b; theme-text = #f8fafc; theme-text-muted = #94a3b8; theme-text-low = #64748b; theme-accent = #10b981; theme-accent-glow = #10b9811c; theme-name = "dark"; theme-changed("dark"); } }
+                            ThemeCard { name: "Alabaster Light"; bg-start: #f9fafb; bg-end: #f3f4f6; panel-bg: #ffffff; accent: #8b5cf6; border-col: #e5e7eb; text-col: #1c1917; active: theme-name == "light"; clicked => { theme-bg-start = #f9fafb; theme-bg-end = #f3f4f6; theme-panel-bg = #ffffff; theme-border = #e5e7eb; theme-text = #1c1917; theme-text-muted = #44403c; theme-text-low = #78716c; theme-accent = #8b5cf6; theme-accent-glow = #8b5cf61c; theme-name = "light"; theme-changed("light"); } }
+                            ThemeCard { name: "Cyberpunk"; bg-start: #030008; bg-end: #1a0025; panel-bg: #080010; accent: #39ff14; border-col: #300040; text-col: #ffffff; active: theme-name == "cyberpunk"; clicked => { theme-bg-start = #030008; theme-bg-end = #1a0025; theme-panel-bg = #080010; theme-border = #300040; theme-text = #ffffff; theme-text-muted = #00f0ff; theme-text-low = #ff007f; theme-accent = #39ff14; theme-accent-glow = #39ff141c; theme-name = "cyberpunk"; theme-changed("cyberpunk"); } }
+                        }
+                        Row {
+                            ThemeCard { name: "Emerald Forest"; bg-start: #020c06; bg-end: #052e16; panel-bg: #03140a; accent: #f59e0b; border-col: #0b3c1d; text-col: #ecfdf5; active: theme-name == "emerald-forest"; clicked => { theme-bg-start = #020c06; theme-bg-end = #052e16; theme-panel-bg = #03140a; theme-border = #0b3c1d; theme-text = #ecfdf5; theme-text-muted = #34d399; theme-text-low = #10b981; theme-accent = #f59e0b; theme-accent-glow = #f59e0b1c; theme-name = "emerald-forest"; theme-changed("emerald-forest"); } }
+                            ThemeCard { name: "Deep Ocean"; bg-start: #020817; bg-end: #0a1929; panel-bg: #050f1f; accent: #64ffda; border-col: #0e294b; text-col: #e2e8f0; active: theme-name == "deep-ocean"; clicked => { theme-bg-start = #020817; theme-bg-end = #0a1929; theme-panel-bg = #050f1f; theme-border = #0e294b; theme-text = #e2e8f0; theme-text-muted = #38bdf8; theme-text-low = #06b6d4; theme-accent = #64ffda; theme-accent-glow = #64ffda1c; theme-name = "deep-ocean"; theme-changed("deep-ocean"); } }
+                            ThemeCard { name: "Sunset Gold"; bg-start: #0f0702; bg-end: #2a1505; panel-bg: #160c04; accent: #ef4444; border-col: #3a1c07; text-col: #fff7ed; active: theme-name == "sunset-gold"; clicked => { theme-bg-start = #0f0702; theme-bg-end = #2a1505; theme-panel-bg = #160c04; theme-border = #3a1c07; theme-text = #fff7ed; theme-text-muted = #f97316; theme-text-low = #f59e0b; theme-accent = #ef4444; theme-accent-glow = #ef44441c; theme-name = "sunset-gold"; theme-changed("sunset-gold"); } }
+                        }
+                        Row {
+                            ThemeCard { name: "Amethyst Glass"; bg-start: #080313; bg-end: #1a0730; panel-bg: #0e051c; accent: #a855f7; border-col: #2e104e; text-col: #faf5ff; active: theme-name == "amethyst-glass"; clicked => { theme-bg-start = #080313; theme-bg-end = #1a0730; theme-panel-bg = #0e051c; theme-border = #2e104e; theme-text = #faf5ff; theme-text-muted = #c084fc; theme-text-low = #e879f9; theme-accent = #a855f7; theme-accent-glow = #a855f71c; theme-name = "amethyst-glass"; theme-changed("amethyst-glass"); } }
+                            ThemeCard { name: "Dracula Midnight"; bg-start: #1e1f29; bg-end: #282a36; panel-bg: #22232e; accent: #50fa7b; border-col: #44475a; text-col: #f8f8f2; active: theme-name == "dracula"; clicked => { theme-bg-start = #1e1f29; theme-bg-end = #282a36; theme-panel-bg = #22232e; theme-border = #44475a; theme-text = #f8f8f2; theme-text-muted = #bd93f9; theme-text-low = #ff79c6; theme-accent = #50fa7b; theme-accent-glow = #50fa7b1c; theme-name = "dracula"; theme-changed("dracula"); } }
+                            ThemeCard { name: "Nord Frost"; bg-start: #2e3440; bg-end: #3b4252; panel-bg: #343b49; accent: #a3be8c; border-col: #4c566a; text-col: #eceff4; active: theme-name == "nord"; clicked => { theme-bg-start = #2e3440; theme-bg-end = #3b4252; theme-panel-bg = #343b49; theme-border = #4c566a; theme-text = #eceff4; theme-text-muted = #81a1c1; theme-text-low = #88c0d0; theme-accent = #a3be8c; theme-accent-glow = #a3be8c1c; theme-name = "nord"; theme-changed("nord"); } }
+                        }
+                        Row {
+                            ThemeCard { name: "Sakura Blossom"; bg-start: #fff5f6; bg-end: #ffe4e8; panel-bg: #ffffff; accent: #f43f5e; border-col: #fbcfe8; text-col: #4c0519; active: theme-name == "sakura"; clicked => { theme-bg-start = #fff5f6; theme-bg-end = #ffe4e8; theme-panel-bg = #ffffff; theme-border = #fbcfe8; theme-text = #4c0519; theme-text-muted = #ec4899; theme-text-low = #db2777; theme-accent = #f43f5e; theme-accent-glow = #f43f5e1c; theme-name = "sakura"; theme-changed("sakura"); } }
+                            Rectangle { background: transparent; }
+                            Rectangle { background: transparent; }
+                        }
+                    }
+                }
+            }
+
+            if active-tab == "settings" : VerticalLayout {
+                vertical-stretch: 1;
+                padding: 24px;
+                spacing: 18px;
+                Text { text: "Settings"; color: theme-text; font-size: 22px; font-weight: 900; }
+                
+                ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 16px;
+
+                        // 1. Connection Card
+                        Rectangle {
+                            background: theme-panel-bg;
+                            border-radius: 8px;
+                            border-width: 1px;
+                            border-color: theme-border;
+                            
+                            VerticalLayout {
+                                padding: 16px;
+                                spacing: 12px;
+                                Text { text: "BACKEND SERVER CONNECTION"; font-size: 13px; font-weight: 900; color: theme-accent; }
+                                
+                                HorizontalLayout {
+                                    spacing: 24px;
+                                    VerticalLayout {
+                                        spacing: 4px;
+                                        Text { text: "HTTP API URL"; font-size: 11px; color: theme-text-low; font-weight: 700; }
+                                        Text { text: "http://127.0.0.1:8000"; font-size: 14px; color: theme-text; font-weight: 700; }
+                                    }
+                                    VerticalLayout {
+                                        spacing: 4px;
+                                        Text { text: "WebSocket Status"; font-size: 11px; color: theme-text-low; font-weight: 700; }
+                                        Text { text: "ws://127.0.0.1:8001 (Connected)"; font-size: 14px; color: theme-accent; font-weight: 700; }
+                                    }
+                                }
+                            }
+                        }
+
+                        // 2. Statistics Card
+                        Rectangle {
+                            background: theme-panel-bg;
+                            border-radius: 8px;
+                            border-width: 1px;
+                            border-color: theme-border;
+                            
+                            VerticalLayout {
+                                padding: 16px;
+                                spacing: 12px;
+                                Text { text: "LOCAL DATABASE STATS"; font-size: 13px; font-weight: 900; color: theme-accent; }
+                                
+                                GridLayout {
+                                    spacing: 16px;
+                                    Row {
+                                        VerticalLayout {
+                                            spacing: 4px;
+                                            Text { text: "Total Scanned Tracks"; font-size: 11px; color: theme-text-low; font-weight: 700; }
+                                            Text { text: stat-total + " Tracks"; font-size: 16px; color: theme-text; font-weight: 900; }
+                                        }
+                                        VerticalLayout {
+                                            spacing: 4px;
+                                            Text { text: "Vocal Profiles"; font-size: 11px; color: theme-text-low; font-weight: 700; }
+                                            Text { text: stat-vocal + " Tracks"; font-size: 16px; color: theme-text; font-weight: 900; }
+                                        }
+                                        VerticalLayout {
+                                            spacing: 4px;
+                                            Text { text: "Instrumental Profiles"; font-size: 11px; color: theme-text-low; font-weight: 700; }
+                                            Text { text: stat-instrumental + " Tracks"; font-size: 16px; color: theme-text; font-weight: 900; }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // 3. Audio Engine Card
+                        Rectangle {
+                            background: theme-panel-bg;
+                            border-radius: 8px;
+                            border-width: 1px;
+                            border-color: theme-border;
+                            
+                            VerticalLayout {
+                                padding: 16px;
+                                spacing: 12px;
+                                Text { text: "AUDIO ENGINE SPECIFICATIONS"; font-size: 13px; font-weight: 900; color: theme-accent; }
+                                
+                                HorizontalLayout {
+                                    spacing: 24px;
+                                    VerticalLayout {
+                                        spacing: 4px;
+                                        Text { text: "Playback Core"; font-size: 11px; color: theme-text-low; font-weight: 700; }
+                                        Text { text: "Rodio (Rust Output Device Interface)"; font-size: 14px; color: theme-text; font-weight: 700; }
+                                    }
+                                    VerticalLayout {
+                                        spacing: 4px;
+                                        Text { text: "DSP Pipeline"; font-size: 11px; color: theme-text-low; font-weight: 700; }
+                                        Text { text: "Real-time Float32 Linear Interpolator"; font-size: 14px; color: theme-text; font-weight: 700; }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Bottom player bar removed
+        }
+
+        Rectangle { width: 1px; background: theme-border; }
+
+        Rectangle {
+            width: 420px;
+            background: theme-panel-bg.with-alpha(0.94);
+
+            VerticalLayout {
+                padding: 14px;
+                spacing: 12px;
+
+                // 1. Top Section: Now Playing Album Cover & Details
+                VerticalLayout {
+                    spacing: 10px;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        Rectangle {
+                            width: 210px;
+                            height: 210px;
+                            border-radius: 12px;
+                            background: @linear-gradient(135deg, #101420 0%, #171d2e 100%);
+                            border-width: 1px;
+                            border-color: theme-border;
+                            clip: true;
+
+                            if (cover-image.width > 0) : Image {
+                                source: cover-image;
+                                width: 100%;
+                                height: 100%;
+                                image-fit: cover;
+                            }
+
+                            if (cover-image.width == 0) : Text {
+                                text: "SONAR";
+                                color: theme-accent;
+                                font-size: 22px;
+                                font-weight: 900;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
+
+                    VerticalLayout {
+                        spacing: 3px;
+                        HorizontalLayout {
+                            spacing: 8px;
+                            Text {
+                                text: active-title;
+                                color: theme-text;
+                                font-size: 15px;
+                                font-weight: 900;
+                                overflow: elide;
+                                horizontal-stretch: 1;
+                            }
+                            IconButton { icon-id: "favorite"; active: active-track-favorite; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { if (active-track-id >= 0) { toggle-favorite(active-track-id); } } }
+                            IconButton { icon-id: "dislike"; active: active-track-disliked; accent: #ef4444; text-color: theme-text; muted-color: theme-text-muted; clicked => { if (active-track-id >= 0) { toggle-dislike(active-track-id); } } }
+                        }
+                        Text {
+                            text: active-artist;
+                            color: theme-accent;
+                            font-size: 12px;
+                            font-weight: 700;
+                            overflow: elide;
+                        }
+                        Text {
+                            text: active-album;
+                            color: theme-text-muted;
+                            font-size: 11px;
+                            font-weight: 600;
+                            overflow: elide;
+                        }
+                    }
+
+                    // 2. Playback Control Box (Premium Dark Card)
+                    Rectangle {
+                        background: #ffffff04;
+                        border-radius: 12px;
+                        border-width: 1px;
+                        border-color: theme-border;
+                        height: ctrl-layout.preferred-height + 28px;
+                        
+                        ctrl-layout := VerticalLayout {
+                            width: parent.width - 28px;
+                            x: 14px;
+                            y: 14px;
+                            spacing: 12px;
+
+                            // Timeline Slider Row
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Text { text: active-position; color: theme-text-low; font-size: 11px; font-weight: 800; vertical-alignment: center; }
+                                CustomSlider {
+                                    minimum: 0;
+                                    maximum: 1;
+                                    value: playhead-progress;
+                                    horizontal-stretch: 1;
+                                    changed(val) => { seek(val); }
+                                }
+                                Text { text: active-duration; color: theme-text-low; font-size: 11px; font-weight: 800; vertical-alignment: center; }
+                            }
+
+                            // Playback Action Buttons Row
+                            HorizontalLayout {
+                                spacing: 16px;
+                                alignment: center;
+
+                                IconButton { icon-id: "shuffle"; active: shuffle-mode; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { toggle-shuffle(); } }
+                                IconButton { icon-id: "prev"; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { prev-track(); } }
+                                
+                                IconButton {
+                                    icon-id: is-playing ? "pause" : "play";
+                                    prominent: true;
+                                    accent: theme-accent;
+                                    text-color: theme-text;
+                                    muted-color: theme-text-muted;
+                                    clicked => { toggle-play(); }
+                                }
+
+                                IconButton { icon-id: "next"; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { next-track(); } }
+                                IconButton { icon-id: "repeat"; active: repeat-mode != "none"; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { toggle-repeat(); } }
+                            }
+
+                            // Volume & DSP Row
+                            HorizontalLayout {
+                                spacing: 12px;
+                                alignment: space-between;
+                                
+                                HorizontalLayout {
+                                    spacing: 8px;
+                                    alignment: start;
+                                    Path {
+                                        width: 14px;
+                                        height: 12px;
+                                        y: 3px;
+                                        stroke: theme-text-muted;
+                                        stroke-width: 1.5px;
+                                        commands: "M 1 4 L 4 4 L 8 1 L 8 11 L 4 8 L 1 8 Z M 11 3 Q 13 6 11 9";
+                                    }
+                                    CustomSlider {
+                                        minimum: 0;
+                                        maximum: 100;
+                                        value: volume;
+                                        width: 120px;
+                                        changed(val) => { change-volume(Math.round(val)); }
+                                    }
+                                }
+
+                                Chip {
+                                    label: dsp-bypass ? "DSP OFF" : "DSP ON";
+                                    active: !dsp-bypass;
+                                    accent: #34d399;
+                                    text-color: theme-text;
+                                    muted-color: theme-text-muted;
+                                    clicked => { update-dsp(dsp-bass, dsp-mid, dsp-vocals, dsp-air, dsp-warmth, dsp-width, !dsp-bypass); }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: 7px;
+                    Chip { label: "Intel"; active: drawer-tab == "intel"; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { drawer-tab = "intel"; } }
+                    Chip { label: "Lyrics"; active: drawer-tab == "lyrics"; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { drawer-tab = "lyrics"; } }
+                    Chip { label: "Queue"; active: drawer-tab == "queue"; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { drawer-tab = "queue"; } }
+                    Chip { label: "Similar"; active: drawer-tab == "similar"; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; clicked => { drawer-tab = "similar"; } }
+                }
+
+                if drawer-tab == "intel" : ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 12px;
+
+                        GridLayout {
+                            spacing: 8px;
+                            Row {
+                                InfoCard { title: "BPM"; value: bpm; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; }
+                                InfoCard { title: "KEY"; value: key-sig; accent: #34d399; text-color: theme-text; muted-color: theme-text-muted; }
+                            }
+                            Row {
+                                InfoCard { title: "DYNAMIC"; value: dynamic-range; accent: #f59e0b; text-color: theme-text; muted-color: theme-text-muted; }
+                                InfoCard { title: "VOCALS"; value: vocal-ratio; accent: #f43f5e; text-color: theme-text; muted-color: theme-text-muted; }
+                            }
+                        }
+
+                        Text { text: "VIBE FINGERPRINT"; color: theme-text-low; font-size: 10px; font-weight: 900; letter-spacing: 1px; }
+                        HorizontalLayout {
+                            spacing: 10px;
+                            Rectangle {
+                                width: 145px; height: 100px; border-radius: 8px; background: #00000020;
+                                Image { source: radar-image; width: 100%; height: 100%; image-fit: contain; }
+                            }
+                            Rectangle {
+                                width: 145px; height: 100px; border-radius: 8px; background: #00000020;
+                                Image { source: waves-image; width: 100%; height: 100%; image-fit: contain; }
+                            }
+                        }
+
+                        Text { text: "TRACK SECTION TIMELINE"; color: theme-text-low; font-size: 10px; font-weight: 900; letter-spacing: 1px; }
+                        HorizontalLayout {
+                            height: 24px;
+                            spacing: 2px;
+                            for sec in section-timeline : TouchArea {
+                                width: sec.percentage * 360px;
+                                clicked => { seek(sec.start); }
+                                Rectangle {
+                                    background: sec.color;
+                                    border-radius: 4px;
+                                    Text { text: sec.label; color: #ffffff; font-size: 8px; font-weight: 900; horizontal-alignment: center; vertical-alignment: center; overflow: elide; }
+                                }
+                            }
+                        }
+
+                        Text { text: "INSTRUMENT ACTIVITY HEATMAP"; color: theme-text-low; font-size: 10px; font-weight: 900; letter-spacing: 1px; }
+                        VerticalLayout {
+                            spacing: 8px;
+                            for row in instrument-heatmap : VerticalLayout {
+                                spacing: 3px;
+                                HorizontalLayout {
+                                    Text { text: row.label; font-size: 11px; font-weight: 800; color: row.accent-color; }
+                                    Rectangle { horizontal-stretch: 1; }
+                                    Text { text: row.presence; font-size: 10px; font-weight: 700; color: theme-text-muted; }
+                                }
+                                HorizontalLayout {
+                                    height: 10px;
+                                    spacing: 1px;
+                                    for cell in row.cells : Rectangle {
+                                        background: cell.is-active ? #ffffff : cell.cell-color;
+                                        opacity: cell.is-active ? 1.0 : cell.cell-opacity;
+                                        border-radius: 1px;
+                                        horizontal-stretch: 1;
+                                        border-width: cell.is-active ? 1px : 0px;
+                                        border-color: #ffffff;
+                                        
+                                        TouchArea {
+                                            clicked => {
+                                                root.seek(cell.cell-index / 30.0);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if drawer-tab == "lyrics" : ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 8px;
+                        padding: 16px;
+                        for line in lyric-lines : Rectangle {
+                            height: 42px;
+                            background: line.active ? @linear-gradient(90deg, #c084fc1f 0%, #00000000 100%) : #00000000;
+                            border-radius: 8px;
+                            
+                            HorizontalLayout {
+                                padding-left: line.active ? 12px : 15px;
+                                spacing: 10px;
+                                if line.active : Rectangle {
+                                    width: 3px;
+                                    background: #a855f7; // purple accent
+                                    border-radius: 1.5px;
+                                }
+                                Text {
+                                    text: line.text;
+                                    color: line.active ? theme-text : theme-text-low;
+                                    font-size: line.active ? 16px : 14.5px;
+                                    font-weight: line.active ? 700 : 500;
+                                    vertical-alignment: center;
+                                    wrap: word-wrap;
+                                }
+                            }
+                            
+                            TouchArea {
+                                clicked => {
+                                    seek-to-time(line.time-ms);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if drawer-tab == "lyrics" && lyric-lines.length == 0 : ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        alignment: center;
+                        Text {
+                            text: lyrics;
+                            color: theme-text-muted;
+                            font-size: 15px;
+                            font-weight: 500;
+                            wrap: word-wrap;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+
+                if drawer-tab == "queue" : ListView {
+                    vertical-stretch: 1;
+                    for track in queue-tracks : TrackRow { track: track; active: track.id == active-track-id; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; low-color: theme-text-low; play(id) => { play-track(id); } }
+                }
+
+                if drawer-tab == "similar" : ListView {
+                    vertical-stretch: 1;
+                    for track in themed-tracks : TrackRow { track: track; active: track.id == active-track-id; accent: theme-accent; text-color: theme-text; muted-color: theme-text-muted; low-color: theme-text-low; play(id) => { play-track(id); } }
+                }
+
+                // Redundant volume footer removed
+            }
+        }
+        }
+    }
+
+    // Full Screen Presentation Overlay (Presenter Mode)
+    Rectangle {
+        visible: fs-overlay-visible;
+        x: 0;
+        y: 0;
+        width: 100%;
+        height: 100%;
+        background: theme-bg-start; // dark solid background
+
+        VerticalLayout {
+            padding: 30px;
+            spacing: 24px;
+
+            // Header close button
+            HorizontalLayout {
+                height: 48px;
+                Rectangle { horizontal-stretch: 1; }
+                Button {
+                    text: "Exit Presenter Mode";
+                    clicked => { fs-overlay-visible = false; }
+                }
+            }
+
+            // Two-panel layout: Left (Info & Specs), Right (Synced Lyrics)
+            HorizontalLayout {
+                spacing: 40px;
+                
+                // Left Panel
+                VerticalLayout {
+                    width: 480px;
+                    spacing: 20px;
+                    alignment: start;
+                    
+                    // Album art wrapper
+                    Rectangle {
+                        width: 320px;
+                        height: 320px;
+                        border-radius: 16px;
+                        background: #1e293b66;
+                        clip: true;
+                        
+                        Image {
+                            source: cover-image;
+                            width: 100%;
+                            height: 100%;
+                            image-fit: cover;
+                        }
+                    }
+                    
+                    // Title and Artist
+                    VerticalLayout {
+                        spacing: 6px;
+                        Text {
+                            text: active-title;
+                            color: theme-text;
+                            font-size: 26px;
+                            font-weight: 800;
+                            wrap: word-wrap;
+                        }
+                        Text {
+                            text: active-artist;
+                            color: theme-accent;
+                            font-size: 18px;
+                            font-weight: 600;
+                            wrap: word-wrap;
+                        }
+                    }
+
+                    // Next Up
+                    HorizontalLayout {
+                        spacing: 8px;
+                        height: 24px;
+                        Text {
+                            text: "Next Up: ";
+                            color: theme-text-muted;
+                            font-size: 13.5px;
+                            font-weight: 700;
+                        }
+                        Text {
+                            text: queue-tracks.length > 0 ? queue-tracks[0].title : "None";
+                            color: theme-text;
+                            font-size: 13.5px;
+                            font-weight: 500;
+                        }
+                    }
+
+                    // Key Specs Card
+                    Rectangle {
+                        background: #0f172a80;
+                        border-radius: 12px;
+                        border-width: 1px;
+                        border-color: theme-border;
+                        
+                        VerticalLayout {
+                            padding: 16px;
+                            spacing: 12px;
+                            
+                            HorizontalLayout {
+                                Text { text: "Key Signature"; color: theme-text-muted; font-size: 14px; }
+                                Rectangle { horizontal-stretch: 1; }
+                                Text { text: key-sig; color: theme-accent; font-size: 14px; font-weight: 700; }
+                            }
+                            HorizontalLayout {
+                                Text { text: "BPM"; color: theme-text-muted; font-size: 14px; }
+                                Rectangle { horizontal-stretch: 1; }
+                                Text { text: bpm; color: theme-text; font-size: 14px; font-weight: 700; }
+                            }
+                            HorizontalLayout {
+                                Text { text: "Vocal Ratio"; color: theme-text-muted; font-size: 14px; }
+                                Rectangle { horizontal-stretch: 1; }
+                                Text { text: vocal-ratio; color: theme-text; font-size: 14px; font-weight: 700; }
+                            }
+                            HorizontalLayout {
+                                Text { text: "Dynamic Range"; color: theme-text-muted; font-size: 14px; }
+                                Rectangle { horizontal-stretch: 1; }
+                                Text { text: dynamic-range; color: theme-text; font-size: 14px; font-weight: 700; }
+                            }
+                        }
+                    }
+
+                    // Live Audio Spectrum Visualizer Card
+                    Rectangle {
+                        background: #0f172a80;
+                        border-radius: 12px;
+                        border-width: 1px;
+                        border-color: theme-border;
+                        height: 110px;
+                        
+                        VerticalLayout {
+                            padding: 14px;
+                            spacing: 10px;
+                            alignment: center;
+                            
+                            Text {
+                                text: "LIVE AUDIO SPECTRUM VISUALIZER";
+                                color: theme-text-muted;
+                                font-size: 11px;
+                                font-weight: 800;
+                                letter-spacing: 1px;
+                            }
+                            
+                            HorizontalLayout {
+                                height: 55px;
+                                spacing: 8px;
+                                alignment: center;
+                                for bar-val[idx] in root.eq-spectrum-bars : Rectangle {
+                                    width: 14px;
+                                    height: root.is-playing ? Math.max(6px, bar-val * 50px) : 8px;
+                                    background: Math.mod(idx, 2) == 0 ? theme-accent : #38bdf8;
+                                    border-radius: 3px;
+                                    animate height { duration: 120ms; easing: ease-in-out; }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Sibling spacing
+                Rectangle { width: 1px; background: theme-border; }
+
+                // Right Panel (Scrolling Lyrics)
+                VerticalLayout {
+                    horizontal-stretch: 1;
+                    spacing: 12px;
+                    
+                    Text {
+                        text: "Lyrics Presentation";
+                        color: theme-text-muted;
+                        font-size: 12px;
+                        font-weight: 800;
+                        letter-spacing: 1px;
+                    }
+                    
+                    ScrollView {
+                        vertical-stretch: 1;
+                        VerticalLayout {
+                            spacing: 12px;
+                            padding: 8px;
+                            for line in lyric-lines : Rectangle {
+                                height: 50px;
+                                background: line.active ? @linear-gradient(90deg, #c084fc1f 0%, #00000000 100%) : #00000000;
+                                border-radius: 8px;
+                                
+                                HorizontalLayout {
+                                    padding-left: line.active ? 16px : 20px;
+                                    spacing: 12px;
+                                    if line.active : Rectangle {
+                                        width: 4px;
+                                        background: #a855f7;
+                                        border-radius: 2px;
+                                    }
+                                    Text {
+                                        text: line.text;
+                                        color: line.active ? theme-text : theme-text-muted.with-alpha(0.5);
+                                        font-size: line.active ? 20px : 17px;
+                                        font-weight: line.active ? 700 : 500;
+                                        vertical-alignment: center;
+                                        wrap: word-wrap;
+                                    }
+                                }
+                                
+                                TouchArea {
+                                    clicked => {
+                                        seek-to-time(line.time-ms);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if lyric-lines.length == 0 : ScrollView {
+                        vertical-stretch: 1;
+                        VerticalLayout {
+                            alignment: center;
+                            Text {
+                                text: lyrics;
+                                color: theme-text-muted;
+                                font-size: 17px;
+                                font-weight: 500;
+                                wrap: word-wrap;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

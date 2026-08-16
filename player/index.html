@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonar — Soundtrack Intelligence Workstation</title>
+    <!-- Google Fonts: Plus Jakarta Sans for premium modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for sleek UI icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=3.1.0">
+    
+    
+</head>
+
+<body class="theme-musicbee-classic">
+    <!-- MusicBee Pro Workspace Header Bar -->
+    <div class="musicbee-header-bar" id="musicbee-header-bar" style="background: #252526; border-bottom: 1px solid #3e3e42; padding: 6px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 10000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <span style="font-weight: 800; font-size: 13px; color: #007acc; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-compact-disc"></i> SONAR PRO
+            </span>
+            <div class="mb-tab-group" style="display: flex; gap: 4px; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 4px;">
+                <button class="mb-tab-btn active" onclick="switchWorkspace('workspace-library')" style="padding: 5px 12px; border: none; border-radius: 3px; background: #007acc; color: #ffffff; font-weight: 700; font-size: 11px; cursor: pointer;"><i class="fa-solid fa-music"></i> Library</button>
+                <button class="mb-tab-btn" onclick="switchWorkspace('workspace-themes')" style="padding: 5px 12px; border: none; border-radius: 3px; background: transparent; color: #cccccc; font-weight: 600; font-size: 11px; cursor: pointer;"><i class="fa-solid fa-compact-disc"></i> Albums</button>
+                <button class="mb-tab-btn" onclick="switchWorkspace('workspace-lyrics')" style="padding: 5px 12px; border: none; border-radius: 3px; background: transparent; color: #cccccc; font-weight: 600; font-size: 11px; cursor: pointer;"><i class="fa-solid fa-microphone"></i> Synced Lyrics</button>
+                <button class="mb-tab-btn" onclick="switchWorkspace('workspace-tag-editor')" style="padding: 5px 12px; border: none; border-radius: 3px; background: transparent; color: #cccccc; font-weight: 600; font-size: 11px; cursor: pointer;"><i class="fa-solid fa-tags"></i> Tag Editor (Ctrl+E)</button>
+                <button class="mb-tab-btn" onclick="switchWorkspace('workspace-dsp')" style="padding: 5px 12px; border: none; border-radius: 3px; background: transparent; color: #cccccc; font-weight: 600; font-size: 11px; cursor: pointer;"><i class="fa-solid fa-sliders"></i> DSP & EQ</button>
+                <button class="mb-tab-btn" onclick="switchWorkspace('workspace-queue')" style="padding: 5px 12px; border: none; border-radius: 3px; background: transparent; color: #cccccc; font-weight: 600; font-size: 11px; cursor: pointer;"><i class="fa-solid fa-list-ol"></i> Now Playing Queue</button>
+                <button class="mb-tab-btn" onclick="switchWorkspace('workspace-settings')" style="padding: 5px 12px; border: none; border-radius: 3px; background: transparent; color: #cccccc; font-weight: 600; font-size: 11px; cursor: pointer;"><i class="fa-solid fa-gear"></i> Settings</button>
+                <button class="mb-tab-btn" onclick="document.body.classList.toggle('theme-musicbee-classic')" style="padding: 5px 12px; border: 1px solid #007acc; border-radius: 3px; background: rgba(0,122,204,0.2); color: #67e8f9; font-weight: 700; font-size: 11px; cursor: pointer;" title="Toggle Dark Desktop Skin"><i class="fa-solid fa-palette"></i> Dark Skin</button>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="mb-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 700;">
+                <i class="fa-solid fa-shield-halved"></i> WASAPI 0.23 Hardware Exclusive (0 dB Bit-Perfect)
+            </span>
+        </div>
+    </div>
+
+    <div class="app-container" id="desktop-app-container">
+
+        <!-- Sidebar: Persistent Left Navigation Rail -->
+        <aside class="app-sidebar" id="app-sidebar" style="display: flex; flex-direction: column; height: calc(100vh - 42px - 60px); max-height: calc(100vh - 42px - 60px); overflow: hidden; z-index: 100; box-sizing: border-box;">
+            <div class="brand-section" style="padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); flex-shrink: 0;">
+                <div class="brand-logo" style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #06b6d4); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                    <i class="fa-solid fa-compact-disc" style="color: white; font-size: 16px;"></i>
+                </div>
+                <div class="brand-name">
+                    <h1 style="font-size: 15px; font-weight: 800; letter-spacing: -0.3px; margin: 0; color: #f8fafc;">Sonar</h1>
+                    <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #10b981;">MusicBee Edition</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav" style="display: flex; flex-direction: column; gap: 14px; padding: 12px 8px 16px 8px; overflow-y: auto; flex: 1;">
+                <!-- Music Library Section -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title" style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1.4px; padding: 6px 10px 4px 10px;">
+                        <span><i class="fa-solid fa-folder-tree" style="margin-right: 6px; color: #10b981;"></i> Music Library</span>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 9px; opacity: 0.6;"></i>
+                    </div>
+                    <a href="#" class="nav-item active" id="btn-show-library" data-workspace="workspace-library">
+                        <i class="fa-solid fa-music"></i>
+                        <span style="flex: 1;">All Tracks</span>
+                        <span id="side-total-tracks" class="nav-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 10px; padding: 1px 7px; border-radius: 999px; font-weight: 700; font-family: monospace;">2,310</span>
+                    </a>
+                    <a href="#" class="nav-item" id="btn-show-themes" data-workspace="workspace-themes">
+                        <i class="fa-solid fa-compact-disc"></i>
+                        <span>Albums & Discography</span>
+                    </a>
+                    <a href="#" class="nav-item" id="btn-show-stats" data-workspace="workspace-stats">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Library Telemetry</span>
+                    </a>
+                </div>
+
+                <!-- Playlists & Collections Section -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title" style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1.4px; padding: 6px 10px 4px 10px;">
+                        <span><i class="fa-solid fa-layer-group" style="margin-right: 6px; color: #a855f7;"></i> Playlists & Mixes</span>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 9px; opacity: 0.6;"></i>
+                    </div>
+                    <a href="#" class="nav-item" id="btn-show-queue" data-workspace="workspace-queue">
+                        <i class="fa-solid fa-list-ol"></i>
+                        <span>Now Playing Queue</span>
+                    </a>
+                    <a href="#" class="nav-item" id="btn-show-favorites" data-workspace="workspace-favorites">
+                        <i class="fa-solid fa-star" style="color: #f59e0b;"></i>
+                        <span>Favorites & Loved</span>
+                    </a>
+                    <a href="#" class="nav-item" id="btn-show-playlist-builder" data-workspace="workspace-playlist-builder">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Smart Playlist Builder</span>
+                    </a>
+                </div>
+
+                <!-- Audio Engine & Tools Section -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title" style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1.4px; padding: 6px 10px 4px 10px;">
+                        <span><i class="fa-solid fa-sliders" style="margin-right: 6px; color: #06b6d4;"></i> Engine & Tools</span>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 9px; opacity: 0.6;"></i>
+                    </div>
+                    <a href="#" class="nav-item" id="btn-show-dsp" data-workspace="workspace-dsp">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Neural DSP Effects</span>
+                    </a>
+                    <a href="#" class="nav-item" id="btn-open-lyrics" onclick="if(typeof loadTrackLyrics === 'function' && state.activeTrackId) loadTrackLyrics(state.activeTrackId); document.getElementById('fullscreen-overlay').style.display='flex';">
+                        <i class="fa-solid fa-microphone" style="color: #06b6d4;"></i>
+                        <span>Karaoke Synced Lyrics</span>
+                    </a>
+                    <a href="#" class="nav-item" id="btn-open-tag-editor" onclick="if(state.activeTrackId) openTagEditor(state.activeTrackId); else alert('Select a track first or press Ctrl+E');">
+                        <i class="fa-solid fa-tags" style="color: #f59e0b;"></i>
+                        <span>In-App Tag Editor (Ctrl+E)</span>
+                    </a>
+                    <a href="#" class="nav-item" id="btn-show-visual-themes" data-workspace="workspace-visual-themes">
+                        <i class="fa-solid fa-palette"></i>
+                        <span>Skins & Visual Themes</span>
+                    </a>
+                    <a href="#" class="nav-item" id="btn-show-remote" data-workspace="workspace-mobile-remote">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                        <span>Wi-Fi Mobile Remote</span>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- System & Preferences Section -->
+            <div class="sidebar-section" style="margin-top: auto; padding: 8px; border-top: 1px solid rgba(255, 255, 255, 0.08); flex-shrink: 0;">
+                <a href="#" class="nav-item" id="btn-show-settings" data-workspace="workspace-settings">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Vault & Settings</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="footer-info">
+                    <span class="version">v2.4.0 (MusicBee Edition)</span>
+                    <button id="btn-theme-toggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="resizer resizer-left" id="resizer-left"></div>
+
+        <!-- Main Workspace Area -->
+        <main class="app-main">
+
+            <!-- WORKSPACE 1: Library Explorer -->
+            <div class="workspace-panel active" id="workspace-library">
+        <!-- Grouping Header Bar & Chips -->
+        <div id="grouping-header-bar" class="grouping-bar" style="display: none; padding: 12px 20px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border-glass); align-items: center; justify-content: space-between; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="header-action-btn" id="btn-close-grouping-bar" title="Close Grouping"><i class="fa-solid fa-xmark"></i></button>
+                <h4 id="grouping-header-title" style="margin: 0; font-size: 14px; font-weight: 700; color: var(--accent-cyan);">Group View</h4>
+                <span id="current-grouping-label" class="badge-tag" style="font-size: 11px;">All</span>
+                <span id="grouping-count-badge" class="badge-count">0</span>
+            </div>
+            <div id="grouping-chips-container" style="display: flex; gap: 8px; flex-wrap: wrap; overflow-x: auto;"></div>
+            <div style="display: flex; align-items: center; gap: 8px; position: relative;">
+                <button class="header-action-btn" id="btn-grouping-menu"><i class="fa-solid fa-layer-group"></i> Group By <i class="fa-solid fa-caret-down"></i></button>
+                <div id="grouping-menu-popup" class="dropdown-popup" style="display: none; position: absolute; right: 0; top: 100%; z-index: 100; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 8px; padding: 8px; box-shadow: var(--shadow-premium); min-width: 160px;"></div>
+            </div>
+        </div>
+        <div id="group-detail-breadcrumb" style="display: none; padding: 8px 20px; font-size: 12px; color: var(--accent-purple);">
+            <button id="btn-close-group-detail" class="header-action-btn" style="margin-right: 6px;"><i class="fa-solid fa-arrow-left"></i></button>
+            <span class="path"></span>
+        </div>
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn" id="btn-history-back" class="header-action-btn btn-history-back" title="Back"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn" id="btn-history-forward" class="header-action-btn btn-history-forward" title="Forward"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button class="header-action-btn" id="btn-breadcrumb-back" style="display: none;"><i class="fa-solid fa-arrow-left"></i> <span id="breadcrumb-back-text">Back</span></button>
+                        <span id="breadcrumb-title" style="display: none; font-size: 14px; font-weight: 600; color: var(--accent-purple); margin-left: 6px;"></span>
+                    </div>
+
+                    <div class="search-bar-container">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Search Soundtrack Intelligence..."
+                            autocomplete="off">
+                        <button id="search-clear-btn" class="clear-btn"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <div class="quick-filters">
+                        <button class="header-action-btn btn-fullscreen" id="btn-fullscreen-toggle"
+                            title="Full Screen Visualizer Mode"><i class="fa-solid fa-expand"></i> Visualizer</button>
+
+                        <div class="vocal-filters-group">
+                            <button class="filter-tag active" data-vocal="">All</button>
+                            <button class="filter-tag" data-vocal="vocal"><i class="fa-solid fa-microphone-lines"></i>
+                                Vocals</button>
+                            <button class="filter-tag" data-vocal="non-vocal"><i class="fa-solid fa-guitar"></i>
+                                Instrumentals</button>
+                        </div>
+                    </div>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"><i
+                            class="fa-solid fa-sliders"></i></button>
+                </header>
+
+                <section class="content-panel">
+                    <div class="panel-header">
+                        <h2>Library Explorer</h2>
+
+                        <div class="panel-actions">
+                            <div class="select-wrapper" style="min-width: 170px;">
+                                <select id="filter-album" data-state="albumFilter" title="MusicBee Group By View Mode">
+                                    <option value="">Group By: None (List)</option>
+                                    <optgroup label="Group Library By">
+                                        <option value="group:album">💿 Group By Album</option>
+                                        <option value="group:artist">🎙️ Group By Artist</option>
+                                        <option value="group:genre">🎼 Group By Genre</option>
+                                        <option value="group:year">📅 Group By Year</option>
+                                        <option value="group:folder">📁 Group By Folder</option>
+                                        <option value="group:format">🎚️ Group By Audio Format</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="select-wrapper">
+                                <select id="filter-character" data-state="characterFilter">
+                                    <option value="">All Vibes</option>
+                                    <option value="Calm / Smooth">Calm / Smooth</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Dynamic / Fluctuating">Dynamic / Fluctuating</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-musical-key" data-state="keyFilter">
+                                    <option value="">Key: All</option>
+                                    <option value="C">C</option>
+                                    <option value="C#">C#</option>
+                                    <option value="D">D</option>
+                                    <option value="D#">D#</option>
+                                    <option value="E">E</option>
+                                    <option value="F">F</option>
+                                    <option value="F#">F#</option>
+                                    <option value="G">G</option>
+                                    <option value="G#">G#</option>
+                                    <option value="A">A</option>
+                                    <option value="A#">A#</option>
+                                    <option value="B">B</option>
+                                </select>
+                            </div>
+                            <div class="select-wrapper">
+                                <select id="filter-emotion" data-state="emotionFilter">
+                                    <option value="">Mood: All</option>
+                                    <option value="Nostalgic">Nostalgic</option>
+                                    <option value="Dark">Dark</option>
+                                    <option value="Happy">Happy</option>
+                                    <option value="Dreamy">Dreamy</option>
+                                    <option value="Sad">Sad</option>
+                                    <option value="Suspenseful">Suspenseful</option>
+                                </select>
+                            </div>
+
+                            <button class="header-action-btn" id="btn-toggle-advanced-filters"
+                                title="Toggle Advanced Filters">
+                                <i class="fa-solid fa-filter"></i> Advanced Filters <span class="filter-count-badge"
+                                    id="advanced-filter-count" style="display:none;">0</span>
+                            </button>
+                            
+                            <button class="header-action-btn btn-reset" id="btn-clear-filters"
+                                title="Clear All Filters" style="display: none; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">
+                                <i class="fa-solid fa-filter-circle-xmark"></i> Clear Filters
+                            </button>
+
+                            <div class="select-wrapper">
+                                <select id="sort-column">
+                                    <option value="title">Sort by Title</option>
+                                    <option value="artist">Sort by Artist</option>
+                                    <option value="album">Sort by Album</option>
+                                    <option value="duration">Sort by Duration</option>
+                                    <option value="audio_smoothness">Sort by Smoothness</option>
+                                    <option value="play_count">Sort by Play Count</option>
+                                    <option value="user_affinity">Sort by Affinity</option>
+                                    <option value="predicted_rating">Sort by Rating</option>
+                                    <option value="dreaminess">Sort by Dreaminess</option>
+                                    <option value="cinematicness">Sort by Cinematicness</option>
+                                </select>
+                            </div>
+
+                            <button class="order-toggle-btn" id="btn-sort-order" data-order="asc"
+                                title="Toggle Sort Order">
+                                <i class="fa-solid fa-arrow-down-a-z"></i>
+                            </button>
+
+                            <button class="order-toggle-btn view-toggle active" data-view="list" title="List View"
+                                style="margin-left: 8px;">
+                                <i class="fa-solid fa-list"></i>
+                            </button>
+                            <button class="order-toggle-btn view-toggle" data-view="medium" title="Medium Grid">
+                                <i class="fa-solid fa-grip"></i>
+                            </button>
+                            <button class="order-toggle-btn view-toggle" data-view="large" title="Large Grid">
+                                <i class="fa-solid fa-table-cells-large"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="advanced-filters-panel" id="advanced-filters-panel">
+                        <div class="advanced-filters-grid">
+
+                            <div class="select-wrapper">
+                                <select id="filter-major-minor" data-state="scaleFilter">
+                                    <option value="">Scale: All</option>
+                                    <option value="Major">Major</option>
+                                    <option value="Minor">Minor</option>
+                                </select>
+                            </div>
+
+
+                            <div class="select-wrapper">
+                                <select id="filter-strings" data-state="stringsFilter">
+                                    <option value="">Strings: All</option>
+                                    <option value="high">High Strings</option>
+                                    <option value="mid">Mod Strings</option>
+                                    <option value="low">Low Strings</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-piano" data-state="pianoFilter">
+                                    <option value="">Piano: All</option>
+                                    <option value="high">High Piano</option>
+                                    <option value="mid">Mod Piano</option>
+                                    <option value="low">Low Piano</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-drums" data-state="drumsFilter">
+                                    <option value="">Drums: All</option>
+                                    <option value="high">High Drums</option>
+                                    <option value="mid">Mod Drums</option>
+                                    <option value="low">Low Drums</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-complexity" data-state="complexityFilter">
+                                    <option value="">Arrangement: All</option>
+                                    <option value="complex">Complex Arrangement</option>
+                                    <option value="simple">Simple Arrangement</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-choir" data-state="choirFilter">
+                                    <option value="">Choir: All</option>
+                                    <option value="high">High Choir</option>
+                                    <option value="mid">Mod Choir</option>
+                                    <option value="low">Low Choir</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-bass" data-state="bassFilter">
+                                    <option value="">Bass: All</option>
+                                    <option value="high">High Bass</option>
+                                    <option value="mid">Mod Bass</option>
+                                    <option value="low">Low Bass</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-winds" data-state="windsFilter">
+                                    <option value="">Winds: All</option>
+                                    <option value="high">High Winds</option>
+                                    <option value="mid">Mod Winds</option>
+                                    <option value="low">Low Winds</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-guitar" data-state="guitarFilter">
+                                    <option value="">Guitar: All</option>
+                                    <option value="high">High Guitar</option>
+                                    <option value="mid">Mod Guitar</option>
+                                    <option value="low">Low Guitar</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-synth" data-state="synthFilter">
+                                    <option value="">Synth: All</option>
+                                    <option value="high">High Synth</option>
+                                    <option value="mid">Mod Synth</option>
+                                    <option value="low">Low Synth</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-brass" data-state="brassFilter">
+                                    <option value="">Brass: All</option>
+                                    <option value="high">High Brass</option>
+                                    <option value="mid">Mod Brass</option>
+                                    <option value="low">Low Brass</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-dreaminess" data-state="dreaminessFilter">
+                                    <option value="">Dreaminess: All</option>
+                                    <option value="high">High Dreamy</option>
+                                    <option value="mid">Mod Dreamy</option>
+                                    <option value="low">Low Dreamy</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-epicness" data-state="epicnessFilter">
+                                    <option value="">Epicness: All</option>
+                                    <option value="high">High Epic</option>
+                                    <option value="mid">Mod Epic</option>
+                                    <option value="low">Low Epic</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-cinematicness" data-state="cinematicnessFilter">
+                                    <option value="">Cinematicness: All</option>
+                                    <option value="high">High Cinematic</option>
+                                    <option value="mid">Mod Cinematic</option>
+                                    <option value="low">Low Cinematic</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-electronicness" data-state="electronicnessFilter">
+                                    <option value="">Electronic: All</option>
+                                    <option value="high">High Electronic</option>
+                                    <option value="mid">Mod Electronic</option>
+                                    <option value="low">Low Electronic</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-nostalgia" data-state="nostalgiaFilter">
+                                    <option value="">Nostalgia: All</option>
+                                    <option value="high">High Nostalgic</option>
+                                    <option value="mid">Mod Nostalgic</option>
+                                    <option value="low">Low Nostalgic</option>
+                                </select>
+                            </div>
+
+                            <div class="select-wrapper">
+                                <select id="filter-bpm" data-state="bpmFilter">
+                                    <option value="">Tempo: All</option>
+                                    <option value="fast">Fast (>130 BPM)</option>
+                                    <option value="mid">Medium (90-130 BPM)</option>
+                                    <option value="slow">Slow (<90 BPM)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="tracks-table" id="tracks-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 38px; text-align: center;">#</th>
+                                    <th style="min-width: 200px;">Title</th>
+                                    <th style="min-width: 140px;">Artist</th>
+                                    <th style="min-width: 140px;">Album</th>
+                                    <th style="width: 90px;">Genre</th>
+                                    <th style="width: 60px; text-align: center;">Year</th>
+                                    <th style="width: 65px; text-align: center;">Time</th>
+                                    <th style="width: 85px; text-align: center;">Format</th>
+                                    <th style="width: 95px; text-align: center;">Rating</th>
+                                    <th style="width: 38px; text-align: center;">♥</th>
+                                    <th style="width: 65px; text-align: center;" class="col-action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tracks-tbody">
+                                <tr>
+                                    <td colspan="11" class="table-loading">
+                                        <i class="fa-solid fa-spinner fa-spin"></i> Loading music library...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div id="tracks-grid" style="display: none;"></div>
+                    </div>
+
+                    <div class="panel-footer">
+                        <div class="pagination-info" id="pagination-info">
+                            Showing 0 to 0 of 0 tracks
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="btn btn-icon" id="pagination-first" disabled><i
+                                    class="fa-solid fa-angles-left"></i> First</button>
+                            <button class="btn btn-icon" id="pagination-prev" disabled><i
+                                    class="fa-solid fa-chevron-left"></i> Prev</button>
+                            <span class="page-number" id="pagination-current">Page 1 of 1</span>
+                            <button class="btn btn-icon" id="pagination-next" disabled>Next <i
+                                    class="fa-solid fa-chevron-right"></i></button>
+                            <button class="btn btn-icon" id="pagination-last" disabled>Last <i
+                                    class="fa-solid fa-angles-right"></i></button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- WORKSPACE 2: DSP Effects -->
+            <div class="workspace-panel" id="workspace-dsp" style="display: none;">
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-left: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn btn-history-back" title="Back (Alt+Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn btn-history-forward" title="Forward (Alt+Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <h2>🎚️ DSP Audio Processor</h2>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"
+                        style="margin-left: auto;"><i class="fa-solid fa-sliders"></i></button>
+                </header>
+                <div class="workspace-content dsp-container">
+                    <div class="settings-card">
+                        <div class="dsp-global-row">
+                            <label class="dsp-switch-label">
+                                <input type="checkbox" id="dsp-global-enable" checked>
+                                <span class="custom-switch-slider"></span>
+                            </label>
+                            <span class="dsp-global-text" id="dsp-global-text">Enable DSP Processing</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-card dsp-effects-list" id="dsp-effects-list">
+                        <!-- Stereo Enhancer -->
+                        <div class="dsp-effect-row collapsed" data-effect="stereo">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-stereo" checked>
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">Stereo Enhancer</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">Width:</span>
+                                    <input type="range" id="dsp-slider-stereo" min="0" max="200" value="100"
+                                        class="volume-slider">
+                                    <span class="value" id="dsp-val-stereo">100%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Crossfeed -->
+                        <div class="dsp-effect-row collapsed" data-effect="crossfeed">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-crossfeed">
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">Crossfeed</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">Strength:</span>
+                                    <input type="range" id="dsp-slider-crossfeed" min="0" max="100" value="30"
+                                        class="volume-slider">
+                                    <span class="value" id="dsp-val-crossfeed">30%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic EQ -->
+                        <div class="dsp-effect-row collapsed" data-effect="eq">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-eq" checked>
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">Dynamic EQ</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">Amount:</span>
+                                    <input type="range" id="dsp-slider-eq" min="0" max="100" value="50"
+                                        class="volume-slider">
+                                    <span class="value" id="dsp-val-eq">50%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bass Enhancement -->
+                        <div class="dsp-effect-row collapsed" data-effect="bass">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-bass" checked>
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">Bass Enhancement</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">Level:</span>
+                                    <input type="range" id="dsp-slider-bass" min="0" max="100" value="60"
+                                        class="volume-slider">
+                                    <span class="value" id="dsp-val-bass">60%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compressor -->
+                        <div class="dsp-effect-row collapsed" data-effect="compressor">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-compressor">
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">Compressor</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">Threshold:</span>
+                                    <input type="range" id="dsp-slider-compressor" min="-60" max="0" value="-24"
+                                        class="volume-slider">
+                                    <span class="value" id="dsp-val-compressor">-24 dB</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Limiter -->
+                        <div class="dsp-effect-row collapsed" data-effect="limiter">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-limiter" checked>
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">Limiter</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">State:</span>
+                                    <span class="value" style="color: var(--accent-cyan);">Hard Limiter Active</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tube Warmth -->
+                        <div class="dsp-effect-row collapsed" data-effect="warmth">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-warmth">
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">Tube Warmth</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">Warmth:</span>
+                                    <input type="range" id="dsp-slider-warmth" min="0" max="100" value="40"
+                                        class="volume-slider">
+                                    <span class="value" id="dsp-val-warmth">40%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reverb Space -->
+                        <div class="dsp-effect-row collapsed" data-effect="reverb">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-reverb">
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">Reverb Space</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">Space:</span>
+                                    <input type="range" id="dsp-slider-reverb" min="0" max="100" value="25"
+                                        class="volume-slider">
+                                    <span class="value" id="dsp-val-reverb">25%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vocal Presence -->
+                        <div class="dsp-effect-row collapsed" data-effect="vocals">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-vocals">
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">Vocal Presence</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">Presence:</span>
+                                    <input type="range" id="dsp-slider-vocals" min="0" max="100" value="50"
+                                        class="volume-slider">
+                                    <span class="value" id="dsp-val-vocals">50%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- High Frequency Air -->
+                        <div class="dsp-effect-row collapsed" data-effect="air">
+                            <div class="dsp-effect-header">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="dsp-cb-air">
+                                    <span class="checkmark"></span>
+                                    <span class="effect-name">High Frequency Air</span>
+                                </label>
+                                <i class="fa-solid fa-chevron-down dsp-collapse-icon"></i>
+                            </div>
+                            <div class="dsp-effect-controls">
+                                <div class="slider-row">
+                                    <span class="label">Air level:</span>
+                                    <input type="range" id="dsp-slider-air" min="0" max="100" value="30"
+                                        class="volume-slider">
+                                    <span class="value" id="dsp-val-air">30%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="dsp-preamp-row" style="display: flex; align-items: center; gap: 16px; padding: 8px 0;">
+                            <label class="checkbox-container" style="display: flex; align-items: center; gap: 8px; cursor: pointer; flex-shrink: 0;">
+                                <input type="checkbox" id="dsp-cb-preamp" checked>
+                                <span class="checkmark"></span>
+                                <span class="effect-name" style="font-weight: 600; font-size: 13px;">Preamp Gain</span>
+                            </label>
+                            <input type="range" id="dsp-slider-preamp" min="-20" max="20" value="0" step="0.5" class="volume-slider" style="flex: 1;">
+                            <span class="value" id="dsp-val-preamp" style="min-width: 48px; text-align: right; font-family: monospace; font-size: 13px; color: var(--accent-cyan);">0 dB</span>
+                            <!-- Alias IDs for JS compatibility -->
+                            <span id="dsp-preamp-val" style="display:none;">0 dB</span>
+                            <input type="range" id="dsp-preamp-slider" style="display:none;" min="-20" max="20" value="0" step="0.5">
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 12px;">
+                            <button class="action-btn-sm" id="dsp-btn-apply-rec" title="Apply AI-recommended DSP settings for this track">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Apply Recommendation
+                            </button>
+                            <button class="action-btn-sm" id="dsp-btn-set-default" title="Save current DSP as default profile">
+                                <i class="fa-solid fa-star"></i> Set as Default
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="dsp-presets-bar">
+                            <div class="preset-load-save">
+                                <select id="dsp-preset-select" class="theme-select">
+                                    <option value="default">Default Flat</option>
+                                    <option value="cinematic">Cinematic OST</option>
+                                    <option value="latenight">Late Night Focus</option>
+                                    <option value="animevocals">Anime Vocals</option>
+                                </select>
+                                <input type="text" id="dsp-preset-name" placeholder="New Preset Name"
+                                    class="theme-input">
+                                <button class="action-btn-sm" id="dsp-btn-save-preset">Save Preset</button>
+                                <button class="action-btn-sm" id="dsp-btn-delete-preset"
+                                    style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #f87171;">Delete</button>
+                            </div>
+
+                            <div class="preset-bulk-btns">
+                                <button class="action-btn-sm" id="dsp-btn-enable-all">Enable All</button>
+                                <button class="action-btn-sm" id="dsp-btn-disable-all"
+                                    style="background: rgba(239, 68, 68, 0.08); border-color: rgba(255, 255, 255, 0.05); color: var(--text-mid);">Disable
+                                    All</button>
+                                <button class="action-btn-sm" id="dsp-btn-reset">Reset Defaults</button>
+                            </div>
+                        </div>
+                        <div class="preset-status-line">
+                            Active DSP Preset: <strong id="dsp-current-preset" class="text-accent">Default Flat</strong>
+                        </div>
+                    </div>
+
+                    <!-- 10-Band Graphic Equalizer Card -->
+                    <div class="settings-card dsp-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border-glass);">
+                            <h3 style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-sliders" style="color: var(--accent-cyan);"></i> 10-Band Graphic Equalizer
+                            </h3>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="select-wrapper">
+                                    <select id="dsp-eq-preset-select" style="min-width: 140px; height: 34px; font-size: 13px; padding: 0 10px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); color: var(--text-high);">
+                                        <option value="flat">Flat (Default)</option>
+                                    </select>
+                                </div>
+                                <button class="action-btn-sm" id="dsp-eq-btn-set-default" title="Set selected preset as default on startup" style="height: 34px; padding: 0 12px; font-size: 12px;"><i class="fa-solid fa-star"></i> Set as Default</button>
+                                <button class="action-btn-sm" id="dsp-eq-btn-delete" style="display: none; height: 34px; padding: 0 12px; font-size: 12px; background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.3);"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                            </div>
+                        </div>
+
+                        <!-- 10-Band Vertical Sliders Container -->
+                        <div id="dsp-10band-container" class="dsp-sliders-container" style="display: flex; justify-content: space-around; align-items: flex-end; padding: 24px 16px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid var(--border-glass); min-height: 250px;">
+                            <!-- Populated dynamically by app.js -->
+                        </div>
+
+                        <!-- Save Custom Preset Row -->
+                        <div style="display: flex; align-items: center; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-glass);">
+                            <input type="text" id="dsp-eq-save-name" placeholder="Preset name (e.g., Vocal Boost)..." class="theme-input" style="flex: 1; max-width: 320px; height: 38px; padding: 0 14px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(0,0,0,0.3); color: var(--text-high);">
+                            <button class="action-btn-lg" id="dsp-eq-btn-save" style="height: 38px; padding: 0 18px; font-size: 13px; border-radius: 8px;"><i class="fa-solid fa-floppy-disk"></i> Save Custom Preset</button>
+                        </div>
+                    </div>
+
+                    <!-- Recommended DSP Section -->
+                    <div class="settings-card" id="dsp-recommended-section">
+                        <h3>Recommended DSP Chain</h3>
+                        <div id="dsp-recommended-content">
+                            <p style="font-size: 12.5px; color: var(--text-low);">Select a track to generate custom DSP
+                                suggestions based on acoustic features.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKSPACE 3: Library Stats -->
+            <div class="workspace-panel" id="workspace-stats" style="display: none;">
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-left: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn btn-history-back" title="Back (Alt+Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn btn-history-forward" title="Forward (Alt+Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <h2>📊 Library Stats</h2>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"
+                        style="margin-left: auto;"><i class="fa-solid fa-sliders"></i></button>
+                </header>
+                <div class="workspace-content">
+                    <div class="analytics-cards" id="stats-dashboard-grid">
+                        <!-- Stat cards injected dynamically -->
+                    </div>
+
+                    <div class="stats-extended-grid">
+                        <div class="stats-card-premium card-most-cinematic" id="stat-card-cinematic">
+                            <h3>🎬 Most Cinematic Track</h3>
+                            <div id="stat-most-cinematic-body" class="stat-highlight-body">
+                                <span class="val-empty">-</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-card-premium card-most-dreamy" id="stat-card-dreamy">
+                            <h3>✨ Most Dreamy Track</h3>
+                            <div id="stat-most-dreamy-body" class="stat-highlight-body">
+                                <span class="val-empty">-</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-card-premium card-top-artists">
+                            <h3>🎤 Top Library Artists</h3>
+                            <div id="stat-top-artists-body" class="stat-artists-list">
+                                <span class="val-empty">No stats loaded</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-card-premium card-top-emotions">
+                            <h3>🎭 Dominant Emotional Moods</h3>
+                            <div id="stat-top-emotions-body" class="stat-artists-list">
+                                <span class="val-empty">No stats loaded</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-card-premium card-top-keys">
+                            <h3>🎼 Key Signatures</h3>
+                            <div id="stat-top-keys-body" class="stat-artists-list">
+                                <span class="val-empty">No stats loaded</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-card-premium card-acoustic-profile">
+                            <h3>🎹 Arrangement & Instrument Profiles</h3>
+                            <div id="stat-acoustic-profile-body" class="stat-artists-list">
+                                <span class="val-empty">No stats loaded</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKSPACE 4: Playlist Builder -->
+            <div class="workspace-panel" id="workspace-playlist-builder" style="display: none;">
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-left: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn btn-history-back" title="Back (Alt+Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn btn-history-forward" title="Forward (Alt+Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <h2>📝 Playlist Builder</h2>
+                    <div class="quick-filters">
+                        <div class="vocal-filters-group">
+                            <button class="filter-tag active" data-pb-vocal="">All</button>
+                            <button class="filter-tag" data-pb-vocal="vocal"><i
+                                    class="fa-solid fa-microphone-lines"></i> Vocals</button>
+                            <button class="filter-tag" data-pb-vocal="non-vocal"><i class="fa-solid fa-guitar"></i>
+                                Instrumentals</button>
+                        </div>
+                    </div>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"><i
+                            class="fa-solid fa-sliders"></i></button>
+                </header>
+                <div class="workspace-content pb-container">
+                    <div class="pb-controls-bar"
+                        style="display: flex; flex-direction: column; gap: 12px; align-items: stretch; background: var(--bg-card); padding: 15px; border-radius: 8px; border: 1px solid var(--border-glass);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <div class="search-bar-container pb-search-bar"
+                                style="max-width: 320px; flex: 1; margin: 0;">
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                <input type="text" id="pb-search-input" placeholder="Filter tracks to add..."
+                                    autocomplete="off">
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-character" data-state="pbCharacterFilter">
+                                        <option value="">All Vibes</option>
+                                        <option value="Calm / Smooth">Calm / Smooth</option>
+                                        <option value="Moderate">Moderate</option>
+                                        <option value="Dynamic / Fluctuating">Dynamic / Fluctuating</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-musical-key" data-state="pbKeyFilter">
+                                        <option value="">Key: All</option>
+                                        <option value="C">C</option>
+                                        <option value="C#">C#</option>
+                                        <option value="D">D</option>
+                                        <option value="D#">D#</option>
+                                        <option value="E">E</option>
+                                        <option value="F">F</option>
+                                        <option value="F#">F#</option>
+                                        <option value="G">G</option>
+                                        <option value="G#">G#</option>
+                                        <option value="A">A</option>
+                                        <option value="A#">A#</option>
+                                        <option value="B">B</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-emotion" data-state="pbEmotionFilter">
+                                        <option value="">Mood: All</option>
+                                        <option value="Nostalgic">Nostalgic</option>
+                                        <option value="Dark">Dark</option>
+                                        <option value="Happy">Happy</option>
+                                        <option value="Dreamy">Dreamy</option>
+                                        <option value="Sad">Sad</option>
+                                        <option value="Suspenseful">Suspenseful</option>
+                                    </select>
+                                </div>
+
+                                <button class="header-action-btn" id="pb-btn-toggle-advanced-filters"
+                                    title="Toggle Advanced Filters">
+                                    <i class="fa-solid fa-filter"></i> Advanced Filters <span class="filter-count-badge"
+                                        id="pb-advanced-filter-count" style="display:none;">0</span>
+                                </button>
+                            </div>
+
+                            <div class="pb-actions-group"
+                                style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                                <span class="selected-count-badge" id="pb-selected-count">Selected: 0</span>
+                                <button class="action-btn-sm" id="pb-btn-select-all">Select All</button>
+                                <button class="action-btn-sm" id="pb-btn-select-vocals">Vocals</button>
+                                <button class="action-btn-sm" id="pb-btn-select-bgm">BGMs</button>
+                                <button class="action-btn-sm" id="pb-btn-clear"
+                                    style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #f87171;">Clear</button>
+                                <input type="text" id="pb-playlist-name" placeholder="Playlist Name..."
+                                    class="theme-input pb-name-input"
+                                    style="width: 150px; font-size: 13px; height: 32px; border-radius: 6px; border: 1px solid var(--border-glass); padding: 0 8px; background: rgba(0,0,0,0.2); color: var(--text-high);">
+                                <button class="action-btn-lg" id="pb-btn-export"
+                                    style="height: 32px; padding: 0 16px; font-size: 13px;"><i
+                                        class="fa-solid fa-file-export"></i> Export M3U</button>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Filters -->
+                        <div class="advanced-filters-panel" id="pb-advanced-filters-panel">
+                            <div class="advanced-filters-grid">
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-major-minor" data-state="pbScaleFilter">
+                                        <option value="">Scale: All</option>
+                                        <option value="Major">Major</option>
+                                        <option value="Minor">Minor</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-strings" data-state="pbStringsFilter">
+                                        <option value="">Strings: All</option>
+                                        <option value="high">High Strings</option>
+                                        <option value="mid">Mod Strings</option>
+                                        <option value="low">Low Strings</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-piano" data-state="pbPianoFilter">
+                                        <option value="">Piano: All</option>
+                                        <option value="high">High Piano</option>
+                                        <option value="mid">Mod Piano</option>
+                                        <option value="low">Low Piano</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-drums" data-state="pbDrumsFilter">
+                                        <option value="">Drums: All</option>
+                                        <option value="high">High Drums</option>
+                                        <option value="mid">Mod Drums</option>
+                                        <option value="low">Low Drums</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-complexity" data-state="pbComplexityFilter">
+                                        <option value="">Arrangement: All</option>
+                                        <option value="complex">Complex Arrangement</option>
+                                        <option value="simple">Simple Arrangement</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-choir" data-state="pbChoirFilter">
+                                        <option value="">Choir: All</option>
+                                        <option value="high">High Choir</option>
+                                        <option value="mid">Mod Choir</option>
+                                        <option value="low">Low Choir</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-winds" data-state="pbWindsFilter">
+                                        <option value="">Winds: All</option>
+                                        <option value="high">High Winds</option>
+                                        <option value="mid">Mod Winds</option>
+                                        <option value="low">Low Winds</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-guitar" data-state="pbGuitarFilter">
+                                        <option value="">Guitar: All</option>
+                                        <option value="high">High Guitar</option>
+                                        <option value="mid">Mod Guitar</option>
+                                        <option value="low">Low Guitar</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-synth" data-state="pbSynthFilter">
+                                        <option value="">Synth: All</option>
+                                        <option value="high">High Synth</option>
+                                        <option value="mid">Mod Synth</option>
+                                        <option value="low">Low Synth</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-brass" data-state="pbBrassFilter">
+                                        <option value="">Brass: All</option>
+                                        <option value="high">High Brass</option>
+                                        <option value="mid">Mod Brass</option>
+                                        <option value="low">Low Brass</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-dreaminess" data-state="pbDreaminessFilter">
+                                        <option value="">Dreaminess: All</option>
+                                        <option value="high">High Dreaminess</option>
+                                        <option value="mid">Mod Dreaminess</option>
+                                        <option value="low">Low Dreaminess</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-epicness" data-state="pbEpicnessFilter">
+                                        <option value="">Epicness: All</option>
+                                        <option value="high">High Epicness</option>
+                                        <option value="mid">Mod Epicness</option>
+                                        <option value="low">Low Epicness</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-cinematicness" data-state="pbCinematicnessFilter">
+                                        <option value="">Cinematicness: All</option>
+                                        <option value="high">High Cinematicness</option>
+                                        <option value="mid">Mod Cinematicness</option>
+                                        <option value="low">Low Cinematicness</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-electronicness" data-state="pbElectronicnessFilter">
+                                        <option value="">Electronicness: All</option>
+                                        <option value="high">High Electronicness</option>
+                                        <option value="mid">Mod Electronicness</option>
+                                        <option value="low">Low Electronicness</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-nostalgia" data-state="pbNostalgiaFilter">
+                                        <option value="">Nostalgia: All</option>
+                                        <option value="high">High Nostalgia</option>
+                                        <option value="mid">Mod Nostalgia</option>
+                                        <option value="low">Low Nostalgia</option>
+                                    </select>
+                                </div>
+                                <div class="select-wrapper">
+                                    <select id="pb-filter-bpm" data-state="pbBpmFilter">
+                                        <option value="">Tempo: All</option>
+                                        <option value="fast">Fast (&gt; 120 BPM)</option>
+                                        <option value="moderate">Moderate (80-120 BPM)</option>
+                                        <option value="slow">Slow (&lt; 80 BPM)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container pb-table-container">
+                        <table class="tracks-table" id="pb-tracks-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px; text-align: center;">Add</th>
+                                    <th>Title</th>
+                                    <th>Artist</th>
+                                    <th>Album</th>
+                                    <th class="col-center">Duration</th>
+                                    <th class="col-center">Vocal</th>
+                                    <th class="col-center">Smoothness</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pb-tracks-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKSPACE 5: Theme Explorer -->
+            <div class="workspace-panel" id="workspace-themes" style="display: none;">
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-left: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn btn-history-back" title="Back (Alt+Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn btn-history-forward" title="Forward (Alt+Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <h2>🎼 Soundtrack Theme Explorer</h2>
+
+                    <div class="search-bar-container pb-search-bar" style="margin-left: 24px; max-width: 300px;">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="themes-search-input" placeholder="Search theme families..."
+                            autocomplete="off">
+                    </div>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"
+                        style="margin-left: auto;"><i class="fa-solid fa-sliders"></i></button>
+                </header>
+                <div class="workspace-content">
+                    <div class="themes-explorer-container" id="themes-explorer-container">
+                        <!-- Populated dynamically with accordion motif cards -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKSPACE 5.5: Albums -->
+            <div class="workspace-panel" id="workspace-albums" style="display: none;">
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-left: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn btn-history-back" title="Back (Alt+Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn btn-history-forward" title="Forward (Alt+Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <h2>💽 Album Explorer</h2>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"
+                        style="margin-left: auto;"><i class="fa-solid fa-sliders"></i></button>
+                </header>
+                <div class="workspace-content"
+                    style="display: flex; flex-direction: column; overflow-y: auto; height: 100%;">
+                    <div id="albums-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px;">
+                        <!-- JS injects albums here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKSPACE 6: Favorites & History -->
+            <div class="workspace-panel" id="workspace-favorites" style="display: none;">
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-left: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn btn-history-back" title="Back (Alt+Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn btn-history-forward" title="Forward (Alt+Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+
+                    <div class="favorites-tabs">
+                        <button class="fav-tab-btn active" data-favtab="favtab-favorites"><i
+                                class="fa-solid fa-star"></i> Favorites</button>
+                        <button class="fav-tab-btn" data-favtab="favtab-mostplayed"><i class="fa-solid fa-fire"></i>
+                            Most Played</button>
+                        <button class="fav-tab-btn" data-favtab="favtab-affinity"><i class="fa-solid fa-heart"></i>
+                            Highest Affinity</button>
+                        <button class="fav-tab-btn" data-favtab="favtab-disliked"><i class="fa-solid fa-thumbs-down"></i>
+                            Disliked</button>
+                    </div>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"
+                        style="margin-left: auto;"><i class="fa-solid fa-sliders"></i></button>
+                </header>
+                <div class="workspace-content">
+                    <!-- Tab 1: Favorites -->
+                    <div class="fav-tab-content active" id="favtab-favorites">
+                        <div class="table-container">
+                            <table class="tracks-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Artist</th>
+                                        <th>Album</th>
+                                        <th class="col-center">Duration</th>
+                                        <th class="col-center">Smoothness</th>
+                                        <th class="col-action">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fav-tracks-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Most Played -->
+                    <div class="fav-tab-content" id="favtab-mostplayed">
+                        <div class="table-container">
+                            <table class="tracks-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Artist</th>
+                                        <th>Album</th>
+                                        <th class="col-center">Play Count</th>
+                                        <th class="col-center">Duration</th>
+                                        <th class="col-action">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mp-tracks-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Highest Affinity -->
+                    <div class="fav-tab-content" id="favtab-affinity">
+                        <div class="table-container">
+                            <table class="tracks-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Artist</th>
+                                        <th>Album</th>
+                                        <th class="col-center">Affinity Score</th>
+                                        <th class="col-center">Duration</th>
+                                        <th class="col-action">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="affinity-tracks-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Disliked Tracks -->
+                    <div class="fav-tab-content" id="favtab-disliked">
+                        <div class="table-container">
+                            <table class="tracks-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Artist</th>
+                                        <th>Album</th>
+                                        <th class="col-center">Duration</th>
+                                        <th class="col-action">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="disliked-tracks-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKSPACE 9: Visual Themes -->
+            <div class="workspace-panel" id="workspace-visual-themes" style="display: none;">
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-left: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn btn-history-back" title="Back (Alt+Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn btn-history-forward" title="Forward (Alt+Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <h2>🎨 Visual Themes</h2>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"
+                        style="margin-left: auto;"><i class="fa-solid fa-sliders"></i></button>
+                </header>
+                <div class="workspace-content themes-tab-container">
+                    <div class="themes-grid" id="themes-grid-container">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKSPACE 7: Mobile Remote Hub -->
+            <div class="workspace-panel" id="workspace-mobile-remote" style="display: none; padding: 28px 32px; width: 100%; box-sizing: border-box;">
+                <div class="workspace-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i class="fa-solid fa-bars"></i></button>
+                        <div class="history-nav-btns" style="display: flex; gap: 4px; margin-right: 6px;">
+                            <button class="nav-hist-btn btn-nav-back" title="Go Back (Alt + Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button class="nav-hist-btn btn-nav-fwd" title="Go Forward (Alt + Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div>
+                            <h2 style="font-size: 22px; font-weight: 800; color: var(--text-high); margin-bottom: 6px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid fa-mobile-screen-button" style="color: var(--accent-purple);"></i> Mobile Remote Connect Hub
+                            </h2>
+                            <p style="font-size: 13px; color: var(--text-low); margin: 0;">Scan the QR code or use the LAN address below from any smartphone or tablet connected to your Wi-Fi network.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span id="remote-hub-status-badge" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%; display: inline-block;"></span> Server Ready
+                        </span>
+                        <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"><i class="fa-solid fa-sliders"></i></button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: minmax(260px, 300px) 1fr; gap: 24px; align-items: start;">
+                    <!-- QR Code Card -->
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 24px; text-align: center; box-shadow: var(--shadow-card); backdrop-filter: blur(12px);">
+                        <div style="background: #fff; padding: 14px; border-radius: 12px; display: inline-block; box-shadow: 0 8px 24px rgba(0,0,0,0.4); margin-bottom: 14px;">
+                            <canvas id="remote-qr-canvas" style="width: 220px; height: 220px; display: block; border-radius: 4px;"></canvas>
+                        </div>
+                        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-purple); margin-bottom: 4px;">Scan with Phone Camera</div>
+                        <div style="font-size: 12px; color: var(--text-mid);">Open Remote Player on iOS or Android</div>
+                    </div>
+
+                    <!-- Connection Info & Quick Guide -->
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; backdrop-filter: blur(12px);">
+                            <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-cyan); display: block; margin-bottom: 8px;">Direct Network URL</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="remote-hub-url-input" readonly value="http://127.0.0.1:8000/" style="flex: 1; padding: 10px 14px; font-family: monospace; font-size: 13px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-glass); border-radius: 8px; color: var(--text-high);">
+                                <button class="action-btn-sm" id="btn-copy-remote-url" style="height: 38px; padding: 0 16px; font-size: 12px; white-space: nowrap; flex-shrink: 0;">
+                                    <i class="fa-solid fa-copy"></i> Copy Link
+                                </button>
+                                <a id="remote-hub-open-link" href="#" target="_blank" class="action-btn-sm" style="height: 38px; padding: 0 14px; font-size: 12px; text-decoration: none; display: flex; align-items: center; justify-content: center; background: rgba(168,85,247,0.15); border-color: rgba(168,85,247,0.3); color: var(--accent-purple);">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open
+                                </a>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; backdrop-filter: blur(12px);">
+                            <h4 style="font-size: 14px; font-weight: 700; color: var(--text-high); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-circle-check" style="color: var(--accent-emerald);"></i> What you can do from your phone:
+                            </h4>
+                            <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: var(--text-mid); line-height: 1.5;">
+                                <li><strong>Full Music Control:</strong> Play, pause, seek, and browse albums or full library.</li>
+                                <li><strong>10-Band Graphic Equalizer:</strong> Adjust graphic EQ sliders and apply audio presets in real-time.</li>
+                                <li><strong>Queue & Lyrics Sync:</strong> Manage up-next queue items and view synchronized scrolling lyrics.</li>
+                                <li><strong>Zero App Install:</strong> Works in iOS Safari, Android Chrome, or desktop web browsers without installing any app.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- WORKSPACE 8: Settings -->
+            <div class="workspace-panel" id="workspace-settings" style="display: none;">
+        <!-- Vault Database Panel -->
+        <div id="vault-panel-container" class="vault-container" style="display: none; padding: 20px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 14px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--accent-purple);"><i class="fa-solid fa-vault"></i> Vault Database Backups & History</h4>
+                <div style="display: flex; gap: 8px;">
+                    <button class="header-action-btn" id="btn-vault-refresh"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                    <button class="header-action-btn" id="btn-vault-create-db"><i class="fa-solid fa-plus"></i> Create Backup</button>
+                    <button class="header-action-btn" id="btn-vault-export-json"><i class="fa-solid fa-file-export"></i> Export JSON</button>
+                    <button class="header-action-btn" id="btn-vault-undo-last"><i class="fa-solid fa-rotate-left"></i> Undo Last</button>
+                </div>
+            </div>
+            <div class="table-container" style="max-height: 200px; overflow-y: auto; margin-bottom: 12px;">
+                <table class="tracks-table">
+                    <thead><tr><th>Backup Name</th><th>Size</th><th>Created</th><th>Actions</th></tr></thead>
+                    <tbody id="vault-backups-tbody"></tbody>
+                </table>
+            </div>
+            <div id="vault-audit-logs-container" style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 11px; max-height: 140px; overflow-y: auto; color: var(--accent-cyan);">
+                Vault Audit Log initialized.
+            </div>
+        </div>
+
+        <!-- Processing Script Console -->
+        <div style="margin-bottom: 24px; padding: 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span id="processing-status-message" style="font-size: 13px; font-weight: 700; color: var(--accent-cyan);">Status: Idle</span>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-mid); display: inline-flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 4px 10px; border: 1px solid var(--border-glass); border-radius: 20px; cursor: pointer;">
+                        <span>Pre-translate</span>
+                        <span class="toggle-switch" style="width: 32px; height: 18px;">
+                            <input type="checkbox" id="settings-toggle-pre-translate" checked>
+                            <span class="toggle-slider" style="border-radius: 18px;"></span>
+                        </span>
+                    </label>
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-mid); display: inline-flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 4px 10px; border: 1px solid var(--border-glass); border-radius: 20px; cursor: pointer;">
+                        <span>Low GPU</span>
+                        <span class="toggle-switch" style="width: 32px; height: 18px;">
+                            <input type="checkbox" id="settings-toggle-low-gpu">
+                            <span class="toggle-slider" style="border-radius: 18px;"></span>
+                        </span>
+                    </label>
+                    <button class="header-action-btn" id="copy-processing-logs"><i class="fa-solid fa-copy"></i> Copy</button>
+                    <button class="header-action-btn" id="clear-processing-logs"><i class="fa-solid fa-eraser"></i> Clear</button>
+                    <button class="header-action-btn" id="stop-processing-script" style="background: rgba(239,68,68,0.15); color: #f87171;"><i class="fa-solid fa-stop"></i> Stop</button>
+                </div>
+            </div>
+            <pre id="processing-logs-console" style="margin: 0; font-family: monospace; font-size: 11px; max-height: 180px; overflow-y: auto; color: var(--text-muted); background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;">Log console initialized.</pre>
+        </div>
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-left: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn btn-history-back" title="Back (Alt+Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn btn-history-forward" title="Forward (Alt+Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <h2>⚙️ System Settings</h2>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"
+                        style="margin-left: auto;"><i class="fa-solid fa-sliders"></i></button>
+                </header>
+                <div class="workspace-content settings-container">
+                    <div class="settings-card">
+                        <h3>Soundtrack Intelligence Database Operations</h3>
+                        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+                            <div class="settings-label-block">
+                                <div class="label">Soundtrack Intelligence Database & Index Operations</div>
+                                <div class="desc">Triggers background python scripts to index tracks, build vault backups, analyze audio features, and fetch lyrics/metadata.</div>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%;">
+                                <button class="header-action-btn" id="btn-toggle-vault-panel" style="padding: 8px 14px; background: rgba(192, 132, 252, 0.15); border-color: rgba(192, 132, 252, 0.3); color: var(--accent-purple);"><i class="fa-solid fa-vault"></i> Open Vault Panel</button>
+                                <button class="header-action-btn" id="settings-btn-backup-vault" style="padding: 8px 14px;"><i class="fa-solid fa-database"></i> Backup Vault</button>
+                                <button class="header-action-btn" id="settings-btn-integrity" style="padding: 8px 14px;"><i class="fa-solid fa-shield-halved"></i> Integrity</button>
+                                <button class="header-action-btn" id="settings-btn-library-index" style="padding: 8px 14px;"><i class="fa-solid fa-folder-tree"></i> Reindex</button>
+                                <button class="header-action-btn" id="settings-btn-similarity" style="padding: 8px 14px;"><i class="fa-solid fa-diagram-project"></i> Similarity</button>
+                                <button class="header-action-btn" id="settings-btn-stem-analyze" style="padding: 8px 14px;"><i class="fa-solid fa-wave-square"></i> Stem Analyze</button>
+                                <button class="header-action-btn" id="settings-btn-classify-dsp" style="padding: 8px 14px;"><i class="fa-solid fa-sliders"></i> Classify DSP</button>
+                                <button class="header-action-btn" id="settings-btn-sync-lyrics" style="padding: 8px 14px;"><i class="fa-solid fa-arrows-rotate"></i> Sync Lyrics</button>
+                                <button class="header-action-btn" id="settings-btn-translate-lyrics" style="padding: 8px 14px;"><i class="fa-solid fa-language"></i> Translate Lyrics</button>
+                                <button class="header-action-btn" id="settings-btn-translate-meta" style="padding: 8px 14px;"><i class="fa-solid fa-globe"></i> Translate Meta</button>
+                                <button class="header-action-btn btn-scan" id="settings-btn-rescan" style="padding: 8px 14px; background: rgba(34, 211, 238, 0.15); border-color: rgba(34, 211, 238, 0.3); color: var(--accent-cyan);"><i class="fa-solid fa-rotate"></i> Rescan Library</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <div class="label">Reset UI Settings Cache</div>
+                                <div class="desc">Clears your player settings (volume, resizer width coordinates, and
+                                    workspace local cache).</div>
+                            </div>
+                            <button class="header-action-btn btn-reset" id="settings-btn-reset-cache"
+                                style="padding: 10px 16px;"><i class="fa-solid fa-trash-can"></i> Reset Cache</button>
+                        </div>
+                    </div>
+
+                    <!-- WASAPI Audio & Device Settings Card -->
+                    <div class="settings-card">
+                        <h3>🔊 WASAPI Hardware Audio Engine Settings</h3>
+                        
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <div class="label">WASAPI Exclusive Mode</div>
+                                <div class="desc">Bypasses Windows Audio Mixer for bit-perfect audio delivery directly to DAC.</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="settings-toggle-wasapi-exclusive" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <div class="label">Audio Output Hardware Device</div>
+                                <div class="desc">Select native WASAPI output device for playback.</div>
+                            </div>
+                            <div class="select-wrapper" style="min-width: 260px;">
+                                <select id="settings-select-audio-device">
+                                    <option value="default">Default System Audio Device</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <div class="label">🎯 System Audio Redirection Target</div>
+                                <div class="desc" id="void-device-desc">
+                                    Select the target endpoint (e.g. <strong>boAt Earphones</strong> or <strong>Monitor Audio</strong>) that receives YouTube/external app sound during redirection.
+                                </div>
+                            </div>
+                            <div class="select-wrapper" style="min-width: 260px;">
+                                <select id="settings-select-void-device">
+                                    <option value="auto">🔇 Auto (Digital Output / NVIDIA preferred)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <div class="label">🔀 Dynamic Sound Redirection</div>
+                                <div class="desc">
+                                    Only redirect system default audio to Headphones when YouTube or external apps actually start outputting sound. Automatically restores system default back to Speakers when YouTube stops!
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="settings-toggle-dynamic-redirect" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <div class="label">⚡ Volume Step Size</div>
+                                <div class="desc">
+                                    Set the percentage adjustment per tick for keyboard shortcuts (`Up/Down`, `Ctrl+Alt+Up/Down`) and volume controls.
+                                </div>
+                            </div>
+                            <div class="select-wrapper" style="min-width: 220px;">
+                                <select id="settings-select-volume-step">
+                                    <option value="1">1% Step (Ultra Fine)</option>
+                                    <option value="2" selected>2% Step (Fine - Default)</option>
+                                    <option value="5">5% Step (Standard)</option>
+                                    <option value="10">10% Step (Fast)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <div class="label">📄 Default Library Items Per Page</div>
+                                <div class="desc">
+                                    Set the default tracks table pagination page size.
+                                </div>
+                            </div>
+                            <div class="select-wrapper" style="min-width: 220px;">
+                                <select id="settings-select-per-page">
+                                    <option value="25">25 / page</option>
+                                    <option value="50" selected>50 / page</option>
+                                    <option value="100">100 / page</option>
+                                    <option value="250">250 / page</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>🔌 App Lifecycle Controls</h3>
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <div class="label">Reload Application Backend</div>
+                                <div class="desc">Restarts the backend server and reloads the interface.</div>
+                            </div>
+                            <button class="header-action-btn" id="settings-btn-reload"
+                                style="padding: 10px 16px; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); color: #60a5fa;"><i class="fa-solid fa-arrows-rotate"></i> Reload Backend</button>
+                        </div>
+                        <div class="settings-row">
+                            <div class="settings-label-block">
+                                <div class="label">Exit Application</div>
+                                <div class="desc">Closes the player backend server completely.</div>
+                            </div>
+                            <button class="header-action-btn" id="settings-btn-exit"
+                                style="padding: 10px 16px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #f87171;"><i class="fa-solid fa-power-off"></i> Exit App</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKSPACE 8: Playback Queue -->
+            <div class="workspace-panel" id="workspace-queue" style="display: none;">
+                <header class="workspace-header">
+                    <button class="layout-toggle-btn btn-toggle-sidebar" title="Toggle Left Sidebar"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <div class="history-nav-btns" style="display: inline-flex; gap: 6px; margin-left: 6px; margin-right: 12px; align-items: center;">
+                        <button class="header-action-btn btn-history-back" title="Back (Alt+Left)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="header-action-btn btn-history-forward" title="Forward (Alt+Right)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <h2>📋 Playback Queue</h2>
+                    <span class="queue-status-badge" id="queue-status-badge"
+                        style="margin-left: 20px; font-size: 11px; background: rgba(34, 211, 238, 0.12); border: 1px solid rgba(34, 211, 238, 0.25); color: var(--accent-cyan); padding: 4px 10px; border-radius: 12px; font-weight: 700;">0
+                        Tracks</span>
+                    <button class="layout-toggle-btn btn-toggle-player" title="Toggle Right Panel"
+                        style="margin-left: auto;"><i class="fa-solid fa-sliders"></i></button>
+                </header>
+                <div class="workspace-content queue-workspace-container"
+                    style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="settings-card"
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+                        <div class="queue-info-meta">
+                            <span style="color: var(--text-mid); font-size: 13px;">Manage current playback tracklist
+                                sequence</span>
+                        </div>
+                        <div class="queue-bulk-btns" style="display: flex; gap: 10px;">
+                            <button class="action-btn-sm" id="queue-btn-shuffle-toggle"><i
+                                    class="fa-solid fa-shuffle"></i> Toggle Shuffle</button>
+                            <button class="action-btn-sm" id="queue-btn-clear"
+                                style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #f87171;"><i
+                                    class="fa-solid fa-trash-can"></i> Clear Queue</button>
+                        </div>
+                    </div>
+
+                    <!-- Queue Search -->
+                    <div style="padding: 0 20px;">
+                        <div class="search-bar-container" style="max-width: 400px; margin-bottom: 5px;">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" id="queue-search-input" placeholder="Search in Playback Queue..."
+                                autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="tracks-table" id="queue-workspace-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px; text-align: center;">Pos</th>
+                                    <th>Title</th>
+                                    <th>Artist</th>
+                                    <th>Album</th>
+                                    <th class="col-center">Duration</th>
+                                    <th class="col-action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queue-workspace-tbody">
+                                <tr>
+                                    <td colspan="6" class="table-empty">Playback queue is empty. Go back to Library
+                                        Explorer to add tracks.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        
+    <!-- Manage Library Workspace -->
+    <div class="workspace-panel" id="workspace-manage-library" style="display: none; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--accent-purple); display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-list-check"></i> Manage Media Library
+            </h3>
+            <div style="display: flex; gap: 8px;">
+                <button class="header-action-btn active" id="btn-ml-tab-tracks"><i class="fa-solid fa-music"></i> Tracks (<span id="ml-tracks-count-badge">0</span>)</button>
+                <button class="header-action-btn" id="btn-ml-tab-albums"><i class="fa-solid fa-compact-disc"></i> Albums (<span id="ml-albums-count-badge">0</span>)</button>
+            </div>
+        </div>
+
+        <div id="ml-section-tracks" class="ml-tab-content">
+            <input type="text" id="ml-tracks-search" placeholder="Search tracks..." class="search-input" style="margin-bottom: 14px; max-width: 340px;">
+            <div class="table-container" style="max-height: 600px; overflow-y: auto;">
+                <table class="tracks-table">
+                    <thead><tr><th>#</th><th>Title</th><th>Artist</th><th>Album</th><th>Vibe</th></tr></thead>
+                    <tbody id="ml-tracks-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="ml-section-albums" class="ml-tab-content" style="display: none;">
+            <input type="text" id="ml-albums-search" placeholder="Search albums..." class="search-input" style="margin-bottom: 14px; max-width: 340px;">
+            <div id="ml-albums-grid" class="grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;"></div>
+        </div>
+    </div>
+</main>
+
+        <div class="resizer resizer-right" id="resizer-right"></div>
+
+        <!-- Slide-out Drawer details panel (Right Intelligence Panel) -->
+        <aside class="details-drawer" id="details-drawer">
+            <div class="drawer-content" id="drawer-inner" style="display: none;">
+
+                <!-- SECTION 0: Always-on Now Playing Header Panel -->
+                <div class="drawer-top-section" id="drawer-top-section">
+                    <div class="now-playing-title-header" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <span><i class="fa-solid fa-music"></i> NOW PLAYING</span>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
+                            <button class="header-action-btn btn-fullscreen" id="btn-drawer-fullscreen-top" title="Launch Visualizer" style="padding: 4px 8px; font-size: 11px; background: rgba(126,230,208,0.08); border: 1px solid rgba(126,230,208,0.25); border-radius: 4px; color: var(--accent-cyan); cursor: pointer; display: flex; align-items: center; gap: 6px; z-index: 10;">
+                                <i class="fa-solid fa-expand"></i> Visualizer
+                            </button>
+                            <button class="header-action-btn btn-toggle-player mobile-right-toggler" title="Toggle Right Panel" style="padding: 4px 8px; font-size: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: var(--text-muted); cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 10;">
+                                <i class="fa-solid fa-sliders"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="album-art-section">
+                        <div class="album-art-placeholder">
+                            <div class="glow-bubble"></div>
+                            <img id="drawer-album-art" class="album-art-img" style="display: none;" alt="Cover Art">
+                            <span id="drawer-album-initials">AB</span>
+                        </div>
+
+                        <div class="track-header-info">
+                            <div class="title-star-row"
+                                style="display: flex; align-items: center; gap: 8px; justify-content: space-between;">
+                                <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1;">
+                                    <h2 id="drawer-title" style="margin-bottom: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Track Title</h2>
+                                    <div class="now-playing-eq" id="mini-eq-visualizer" title="Audio Spectrum Visualizer" style="flex-shrink: 0;">
+                                        <div class="eq-bar bar1"></div>
+                                        <div class="eq-bar bar2"></div>
+                                        <div class="eq-bar bar3"></div>
+                                        <div class="eq-bar bar4"></div>
+                                    </div>
+                                </div>
+                                <button class="drawer-star-btn" id="btn-drawer-favorite" title="Add to Favorites" style="flex-shrink: 0;"><i
+                                        class="fa-regular fa-star"></i></button>
+                            </div>
+                            <p class="artist" id="drawer-artist">Artist Name</p>
+                            <p class="album" id="drawer-album"><i class="fa-solid fa-compact-disc"></i> Album Name</p>
+                            <div style="margin-top: 4px;">
+                                
+                            <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">
+                                <div class="aq-pills-container" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                    <span id="aq-pill-format" class="aq-pill" style="font-size: 10px; font-weight: 700; background: rgba(192, 132, 252, 0.15); color: var(--accent-purple); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(192, 132, 252, 0.3);"><i class="fa-solid fa-wave-square" style="font-size: 9px;"></i> FLAC</span>
+                                    <span id="aq-pill-mode" class="aq-pill" style="font-size: 10px; font-weight: 700; background: rgba(148, 163, 184, 0.15); color: #94a3b8; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.3);"><i class="fa-solid fa-volume-high" style="font-size: 9px;"></i> Shared Mode</span>
+                                    <span id="aq-pill-specs" class="aq-pill" style="font-size: 10px; font-weight: 600; color: var(--text-muted); display: none;">-</span>
+                                    <span id="native-format-badge" class="aq-pill" style="display: none;">Native</span>
+                                    <span id="player-format-badge" style="font-size: 10px; font-weight: 700; background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); color: #34d399; padding: 2px 8px; border-radius: 10px; display: inline-block;">16-bit · 44.1 kHz</span>
+                                </div>
+                                <div id="live-chord-container" style="display: flex; align-items: center;">
+                                    <span id="live-chord-badge" class="aq-pill" style="display: none; font-size: 10px; font-weight: 700; background: rgba(251, 191, 36, 0.18); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.35); padding: 2px 8px; border-radius: 6px;"><i class="fa-solid fa-music" style="font-size: 9px; margin-right: 4px;"></i>Chord: <span id="live-chord-name">C</span></span>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audio Playback controls -->
+                    <div class="custom-audio-player">
+                        <audio id="main-audio-element" preload="none" crossorigin="anonymous"></audio>
+
+                        <div class="player-timeline">
+                            <span class="time-current" id="audio-time-current">00:00</span>
+                            <div class="timeline-slider-wrapper" style="position: relative; flex: 1; display: flex; align-items: center;">
+                                <div class="timeline-track-bg" style="position: absolute; left: 0; right: 0; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.13); overflow: hidden; pointer-events: none;">
+                                    <div id="audio-slider-fill" style="width: 100%; height: 100%; background: var(--accent-cyan); border-radius: 999px; transform-origin: left center; transform: scaleX(0); will-change: transform; transition: none;"></div>
+                                </div>
+                                <input type="range" class="timeline-slider" id="audio-slider" min="0" max="100" value="0" style="position: relative; width: 100%; z-index: 2; background: transparent !important;">
+                            </div>
+                            <span class="time-total" id="audio-time-total">00:00</span>
+                        </div>
+
+                        <div class="player-controls">
+                            <button class="control-btn playlist-opt-btn" id="audio-btn-shuffle" title="Shuffle On/Off"><i class="fa-solid fa-shuffle"></i></button>
+                            <button class="control-btn mode-selector-btn" id="audio-btn-shuffle-mode" title="Shuffle Mode: Standard / AI / Melody"><i class="fa-solid fa-dice-five"></i></button>
+                            <button class="control-btn" id="audio-btn-prev" title="Previous Track"><i class="fa-solid fa-backward"></i></button>
+                            <button class="control-btn play-btn" id="audio-btn-play-pause" title="Play/Pause"><i class="fa-solid fa-play"></i></button>
+                            <button class="control-btn" id="audio-btn-next" title="Next Track"><i class="fa-solid fa-forward"></i></button>
+                            <button class="control-btn playlist-opt-btn" id="audio-btn-repeat" title="Repeat On/Off"><i class="fa-solid fa-repeat"></i></button>
+                            <button class="control-btn mode-selector-btn" id="audio-btn-repeat-mode" title="Repeat Mode: All / Album / Artist / One"><i class="fa-solid fa-layer-group"></i></button>
+                            <button class="control-btn playlist-opt-btn" id="btn-drawer-dislike" title="Dislike Track"><i class="fa-regular fa-thumbs-down"></i></button>
+                            <button class="control-btn drawer-star-btn" id="btn-drawer-favorite" title="Add to Favorites"><i class="fa-regular fa-star"></i></button>
+                            <button class="control-btn" id="btn-drawer-fullscreen" title="Theater / Fullscreen Visualizer"><i class="fa-solid fa-expand"></i></button>
+                        </div>
+
+                        <div class="volume-container">
+                            <i class="fa-solid fa-volume-low volume-icon" id="audio-volume-icon"></i>
+                            <input type="range" class="volume-slider" id="audio-volume-slider" min="0" max="100" value="80">
+                            <span class="volume-pct" id="audio-volume-val">80%</span>
+                        </div>
+
+                        <!-- System Volume Row -->
+                        <div class="system-vol-row">
+                            <i class="fa-solid fa-display system-vol-icon" title="System Volume"></i>
+                            <input type="range" class="system-vol-slider" id="system-volume-slider" min="0" max="100" value="50">
+                            <span class="system-vol-pct" id="system-volume-val">50%</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="resizer-horizontal" id="resizer-horizontal"></div>
+
+                <!-- Three Bottom Tabs: Intelligence, Themes, Lyrics -->
+                <div class="drawer-bottom-section" id="drawer-bottom-section">
+                    <div class="drawer-tabs">
+                        <div class="tabs-scroll-area">
+                            <button class="tab-btn active" data-tab="tab-intel"><i class="fa-solid fa-brain"></i>
+                                Intelligence</button>
+                            <button class="tab-btn" data-tab="tab-themes"><i class="fa-solid fa-diagram-project"></i>
+                                Themes</button>
+                            <button class="tab-btn" data-tab="tab-lyrics"><i class="fa-solid fa-align-left"></i>
+                                Lyrics</button>
+                            <button class="tab-btn" data-tab="tab-queue"><i class="fa-solid fa-list-ol"></i>
+                                Queue</button>
+                            <button class="tab-btn" data-tab="tab-dsp" id="tab-btn-dsp"><i class="fa-solid fa-sliders"></i>
+                                DSP</button>
+                            <button class="tab-btn" data-tab="tab-similar"><i class="fa-solid fa-diagram-project"></i>
+                                Similar</button>
+                            <button class="tab-btn" data-tab="tab-melody"><i class="fa-solid fa-music"></i>
+                                Melody</button>
+                        </div>
+                    </div>
+
+
+
+                    <!-- TAB 5: Similar Tracks -->
+                    <div class="tab-content" id="tab-similar" style="height: 100%; padding: 15px; overflow-y: auto;">
+                        <h4 style="margin-top: 0; color: var(--accent-magenta);">Semantically Similar Tracks</h4>
+                        <div id="drawer-similar-list" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: DTW Melody Matches -->
+                    <div class="tab-content" id="tab-melody" style="height: 100%; padding: 15px; overflow-y: auto;">
+                        <h4 style="margin-top: 0; color: var(--accent-cyan);">True Melody Twins (DTW)</h4>
+                        <div id="drawer-melody-list" style="display: flex; flex-direction: column; gap: 10px;">
+                            <span class="no-themes">Click a track to load melody twins.</span>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: Queue -->
+                    <div class="tab-content" id="tab-queue" style="height: 100%;">
+                        <div class="queue-widget-list" id="drawer-queue-list"
+                            style="max-height: none; height: 100%; overflow-y: auto;">
+                            <!-- Populated dynamically with playing and next 3 tracks -->
+                        </div>
+                    </div>
+
+                    <!-- TAB 7: DSP Processor & Audio Effects Toggle Panel -->
+                    <div class="tab-content" id="tab-dsp" style="height: 100%; padding: 16px; overflow-y: auto;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid fa-sliders" style="font-size: 16px; color: var(--accent-cyan);"></i>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 13px; font-weight: 700; color: var(--text-main, #f8fafc);">DSP Audio Processing</h4>
+                                    <div style="font-size: 11px; color: var(--text-muted, #94a3b8); margin-top: 2px;">Real-time Audio Signal Processing & Equalizer</div>
+                                </div>
+                            </div>
+                            <label class="toggle-switch" title="Toggle DSP Master On/Off" style="position: relative; display: inline-block; width: 42px; height: 22px;">
+                                <input type="checkbox" id="bottom-dsp-master-toggle" checked style="opacity: 0; width: 0; height: 0;">
+                                <span class="toggle-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.15); transition: .3s; border-radius: 22px;"></span>
+                            </label>
+                        </div>
+
+                        <!-- Quick DSP Effect Toggles Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 16px;">
+                            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 12px; font-weight: 600; color: #e2e8f0;">Equalizer (EQ)</span>
+                                <input type="checkbox" id="bottom-dsp-cb-eq" checked style="accent-color: var(--accent-cyan);">
+                            </div>
+                            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 12px; font-weight: 600; color: #e2e8f0;">Bass Boost</span>
+                                <input type="checkbox" id="bottom-dsp-cb-bass" checked style="accent-color: var(--accent-cyan);">
+                            </div>
+                            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 12px; font-weight: 600; color: #e2e8f0;">Spatial Stereo</span>
+                                <input type="checkbox" id="bottom-dsp-cb-stereo" checked style="accent-color: var(--accent-cyan);">
+                            </div>
+                            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 12px; font-weight: 600; color: #e2e8f0;">Compressor</span>
+                                <input type="checkbox" id="bottom-dsp-cb-compressor" style="accent-color: var(--accent-cyan);">
+                            </div>
+                            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 12px; font-weight: 600; color: #e2e8f0;">Reverb</span>
+                                <input type="checkbox" id="bottom-dsp-cb-reverb" style="accent-color: var(--accent-cyan);">
+                            </div>
+                            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 12px; font-weight: 600; color: #e2e8f0;">Limiter</span>
+                                <input type="checkbox" id="bottom-dsp-cb-limiter" checked style="accent-color: var(--accent-cyan);">
+                            </div>
+                        </div>
+
+                        <button class="header-action-btn" id="btn-open-full-dsp-workspace" data-workspace="workspace-dsp" style="width: 100%; justify-content: center; padding: 10px; background: rgba(34, 211, 238, 0.12); border: 1px solid rgba(34, 211, 238, 0.3); border-radius: 8px; color: var(--accent-cyan); font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-sliders"></i> Open Full DSP Processor Workspace
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: Track Intelligence -->
+                    <div class="tab-content active" id="tab-intel">
+                        <!-- Intelligence Summary Header -->
+                        <div class="intel-summary-header" id="intel-summary-header">
+                            <!-- Injected dynamically by JS -->
+                        </div>
+
+                        <!-- Vibe Fingerprint Radar Chart -->
+                        <div class="intelligence-card">
+                            <h3>Vibe Fingerprint</h3>
+                            <div class="chart-radar-container" id="chart-radar-container"></div>
+                        </div>
+
+                        <!-- Emotional Arc Wave -->
+                        <div class="intelligence-card">
+                            <h3>Emotional Arc Progression</h3>
+                            <div class="chart-emotion-container" id="chart-emotion-container"></div>
+                        </div>
+
+                        <!-- Realtime playing section indicator -->
+                        <div class="current-section-banner" id="current-section-banner">
+                            <span class="lbl">Now Playing Section:</span>
+                            <span class="val" id="current-section-name">-</span>
+                            <span class="time" id="current-section-time">00:00 → 00:00</span>
+                        </div>
+
+                        <!-- Section Timeline -->
+                        <div class="intelligence-card">
+                            <h3>Track Section Timeline</h3>
+                            <div class="timeline-container-v2" id="timeline-container-v2"></div>
+                        </div>
+
+                        <!-- Instrument Activity Heatmap -->
+                        <div class="intelligence-card">
+                            <h3>Instrument Activity Heatmap</h3>
+                            <div class="heatmap-container" id="heatmap-container"></div>
+                        </div>
+
+                        <!-- Acoustic & Production Profiler -->
+                        <div class="intelligence-card">
+                            <h3>Acoustic & Production Profiler</h3>
+                            <div class="profiler-grid" id="profiler-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+
+
+
+                        <!-- Climax Peak auditioner -->
+                        <div style="margin-top: 10px; display: flex; justify-content: center;">
+
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Themes -->
+                    <div class="tab-content" id="tab-themes">
+                        <div class="theme-variations-section">
+                            <h3>Theme Family Cluster</h3>
+                            <p class="theme-info-desc">Other variations in the theme library sharing a common musical
+                                footprint.</p>
+                            <div class="theme-variations-list" id="theme-variations-list">
+                                <span class="no-themes">No theme cluster detected.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: Lyrics -->
+                    <div class="tab-content" id="tab-lyrics">
+                        <div class="lyrics-container">
+                            <div class="lyrics-text" id="lyrics-content">No lyrics available.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drawer-empty-state" id="drawer-empty">
+                <i class="fa-solid fa-arrow-left"></i>
+                <h3>Select a Track</h3>
+                <p>Click on any track in the Explorer workspace to initialize real-time Web Audio processing nodes, play
+                    media, and render acoustic timeline indicators.</p>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- Mobile Remote Interface (Visible only on mobile screen viewports) -->
+    <!-- ======================================================================= -->
+    <audio id="silent-audio" loop src="silence.wav"></audio>
+
+    <div class="app-layout" id="mobile-app-layout" style="display:none;">
+        <header>
+            <div class="brand-logo"><i class="fa-solid fa-wave-square"></i> SONAR</div>
+            <div class="remote-label">Mobile Remote</div>
+        </header>
+
+        <div id="unlock-audio-banner" style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #e9d5ff; padding: 10px 16px; font-size: 12px; text-align: center; border-radius: 8px; margin: 10px 10px 0 10px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10;">
+            <i class="fa-solid fa-circle-exclamation" style="color: var(--accent-purple);"></i>
+            <span>Tap anywhere to enable lockscreen notifications & background play!</span>
+        </div>
+
+        <div class="tabs-row">
+            <button class="tab-btn active" id="remote-tab-albums">Albums</button>
+            <button class="tab-btn" id="remote-tab-search"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+            <button class="tab-btn" id="remote-tab-queue">Queue</button>
+            <button class="tab-btn" id="remote-tab-lyrics">Lyrics</button>
+            <button class="tab-btn" id="remote-tab-discover">Discover</button>
+            <button class="tab-btn" id="remote-tab-favorites"><i class="fa-solid fa-star"></i> Favorites</button>
+            <button class="tab-btn" id="remote-tab-mostplayed"><i class="fa-solid fa-fire"></i> History</button>
+            <button class="tab-btn" id="remote-tab-moods"><i class="fa-solid fa-wand-magic-sparkles"></i> Vibes</button>
+            <button class="tab-btn" id="remote-tab-dsp"><i class="fa-solid fa-sliders"></i> DSP</button>
+            <button class="tab-btn" id="remote-tab-settings"><i class="fa-solid fa-gear"></i> Settings</button>
+        </div>
+
+        <div class="content-area">
+            <!-- Albums View -->
+            <div class="tab-view active" id="remote-albums-view-container">
+                <div id="albums-grid-view">
+                    <h3 class="view-title"><i class="fa-solid fa-compact-disc"></i> Workstation Albums</h3>
+                    <div class="albums-grid" id="album-list"><div class="no-data">Loading albums...</div></div>
+                </div>
+                <div id="album-tracks-view" style="display: none;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <button id="btn-back-to-albums" style="background: none; border: none; color: var(--accent-cyan); font-size: 12.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-arrow-left"></i> Albums</button>
+                        <button id="btn-play-full-album" style="background: #fff; color: #000; border: none; padding: 6px 14px; border-radius: 12px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-play"></i> Play Album</button>
+                    </div>
+                    <h4 id="selected-album-title" style="font-size: 15px; font-weight: 800; color: var(--text-high); margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid var(--accent-cyan); padding-left: 8px;">Album Title</h4>
+                    <div class="tracks-list" id="remote-track-list"></div>
+                </div>
+            </div>
+
+            <!-- Search View -->
+            <div class="tab-view" id="remote-search-view-container">
+                <h3 class="view-title"><i class="fa-solid fa-magnifying-glass"></i> Search & Filter Library</h3>
+                <div class="remote-filter-bar" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; padding: 0 4px;">
+                    <div style="position: relative; width: 100%;">
+                        <input type="text" id="remote-search-input" placeholder="Search title, artist..." style="width: 100%; padding: 10px 36px 10px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-high); font-size: 14px; outline: none;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-mid); pointer-events: none;"></i>
+                    </div>
+                    <div style="display: flex; gap: 8px; width: 100%; overflow-x: auto; padding-bottom: 4px;">
+                        <select id="remote-filter-vocal" style="padding: 6px 12px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-high); font-size: 12px; outline: none; min-width: 100px;">
+                            <option value="">Vocals: All</option><option value="vocal">Vocals</option><option value="non-vocal">Instrumental</option>
+                        </select>
+                        <select id="remote-filter-character" style="padding: 6px 12px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-high); font-size: 12px; outline: none; min-width: 90px;">
+                            <option value="">Vibe: All</option><option value="Calm / Smooth">Calm / Smooth</option><option value="Moderate">Moderate</option><option value="Dynamic / Active">Dynamic / Active</option>
+                        </select>
+                        <select id="remote-filter-key" style="padding: 6px 12px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-high); font-size: 12px; outline: none; min-width: 90px;">
+                            <option value="">Key: All</option><option value="C">C</option><option value="C#">C#</option><option value="D">D</option><option value="D#">D#</option><option value="E">E</option><option value="F">F</option><option value="F#">F#</option><option value="G">G</option><option value="G#">G#</option><option value="A">A</option><option value="A#">A#</option><option value="B">B</option>
+                        </select>
+                        <select id="remote-filter-scale" style="padding: 6px 12px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-high); font-size: 12px; outline: none; min-width: 90px;">
+                            <option value="">Scale: All</option><option value="Major">Major</option><option value="Minor">Minor</option>
+                        </select>
+                        <select id="remote-filter-emotion" style="padding: 6px 12px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-high); font-size: 12px; outline: none; min-width: 100px;">
+                            <option value="">Emotion: All</option><option value="calm">Calm</option><option value="epic">Epic</option><option value="happy">Happy</option><option value="sad">Sad</option><option value="dark">Dark</option><option value="energetic">Energetic</option>
+                        </select>
+                    </div>
+                    <button id="btn-remote-adv-toggle" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: var(--text-mid); padding: 8px 12px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <span><i class="fa-solid fa-sliders" style="margin-right: 6px;"></i> Advanced Filters <span id="remote-adv-badge" style="display: none; background: var(--accent-cyan); color: #000; font-weight: 700; border-radius: 50%; padding: 1px 6px; font-size: 9px; margin-left: 4px;">0</span></span>
+                        <i class="fa-solid fa-chevron-down" id="remote-adv-chevron"></i>
+                    </button>
+                    <div id="remote-adv-drawer" style="display: none; flex-direction: column; gap: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; margin-top: 2px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div><label style="font-size: 10px; color: var(--text-low); display: block; margin-bottom: 2px;">Strings Density</label><select id="remote-filter-strings" style="width:100%; padding: 4px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: var(--text-high); font-size: 11px;"><option value="">All</option><option value="none">None (0%)</option><option value="light">Light (&lt;30%)</option><option value="moderate">Moderate (30-70%)</option><option value="dense">Dense (&gt;70%)</option></select></div>
+                            <div><label style="font-size: 10px; color: var(--text-low); display: block; margin-bottom: 2px;">Piano Presence</label><select id="remote-filter-piano" style="width:100%; padding: 4px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: var(--text-high); font-size: 11px;"><option value="">All</option><option value="none">None (0%)</option><option value="light">Light (&lt;30%)</option><option value="moderate">Moderate (30-70%)</option><option value="dense">Dense (&gt;70%)</option></select></div>
+                            <div><label style="font-size: 10px; color: var(--text-low); display: block; margin-bottom: 2px;">Drums/Beats</label><select id="remote-filter-drums" style="width:100%; padding: 4px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: var(--text-high); font-size: 11px;"><option value="">All</option><option value="none">None (0%)</option><option value="light">Light (&lt;30%)</option><option value="moderate">Moderate (30-70%)</option><option value="dense">Dense (&gt;70%)</option></select></div>
+                            <div><label style="font-size: 10px; color: var(--text-low); display: block; margin-bottom: 2px;">Choir/Vocals</label><select id="remote-filter-choir" style="width:100%; padding: 4px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: var(--text-high); font-size: 11px;"><option value="">All</option><option value="none">None (0%)</option><option value="light">Light (&lt;30%)</option><option value="moderate">Moderate (30-70%)</option><option value="dense">Dense (&gt;70%)</option></select></div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+                            <div><label style="font-size: 10px; color: var(--text-low); display: block; margin-bottom: 2px;">Dreaminess</label><select id="remote-filter-dreaminess" style="width:100%; padding: 4px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: var(--text-high); font-size: 11px;"><option value="">All</option><option value="low">Low (&lt;30%)</option><option value="moderate">Moderate (30-70%)</option><option value="high">High (&gt;70%)</option></select></div>
+                            <div><label style="font-size: 10px; color: var(--text-low); display: block; margin-bottom: 2px;">Epicness</label><select id="remote-filter-epicness" style="width:100%; padding: 4px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: var(--text-high); font-size: 11px;"><option value="">All</option><option value="low">Low (&lt;30%)</option><option value="moderate">Moderate (30-70%)</option><option value="high">High (&gt;70%)</option></select></div>
+                            <div><label style="font-size: 10px; color: var(--text-low); display: block; margin-bottom: 2px;">Cinematicness</label><select id="remote-filter-cinematicness" style="width:100%; padding: 4px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: var(--text-high); font-size: 11px;"><option value="">All</option><option value="low">Low (&lt;30%)</option><option value="moderate">Moderate (30-70%)</option><option value="high">High (&gt;70%)</option></select></div>
+                            <div><label style="font-size: 10px; color: var(--text-low); display: block; margin-bottom: 2px;">Tempo (BPM)</label><select id="remote-filter-bpm" style="width:100%; padding: 4px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: var(--text-high); font-size: 11px;"><option value="">All</option><option value="slow">Slow (&lt;90 BPM)</option><option value="moderate">Moderate (90-130)</option><option value="fast">Fast (&gt;130 BPM)</option></select></div>
+                        </div>
+                        <button id="btn-remote-reset-filters" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); border-radius: 4px; color: #f87171; padding: 4px 8px; font-size: 11px; cursor: pointer; align-self: flex-end; margin-top: 8px;">Clear All Filters</button>
+                    </div>
+                </div>
+                <div class="tracks-list" id="remote-search-list" style="overflow-y: auto; height: calc(100% - 150px);"><div class="no-data">Start typing or select a filter above</div></div>
+            </div>
+
+            <!-- Queue View -->
+            <div class="tab-view" id="remote-queue-view-container">
+                <h3 class="view-title purple"><i class="fa-solid fa-list-ul"></i> Workstation Queue</h3>
+                <div class="tracks-list" id="remote-queue-list"><div class="no-data">Queue is empty</div></div>
+            </div>
+
+            <!-- Lyrics View -->
+            <div class="tab-view" id="remote-lyrics-view-container">
+                <h3 class="view-title purple"><i class="fa-solid fa-align-left"></i> Synced Lyrics</h3>
+                <div class="lyrics-container" id="remote-lyrics-content"><div class="no-data">No track loaded</div></div>
+            </div>
+
+            <!-- Discover View -->
+            <div class="tab-view" id="remote-discover-view-container">
+                <h3 class="view-title"><i class="fa-solid fa-brain"></i> Neural Similar Tracks</h3>
+                <div id="remote-recommendations"><div class="no-data">No recommendations loaded</div></div>
+            </div>
+
+            <!-- Favorites View -->
+            <div class="tab-view" id="remote-favorites-view-container">
+                <h3 class="view-title purple"><i class="fa-solid fa-star"></i> Workstation Favorites</h3>
+                <div class="tracks-list" id="remote-favorites-list"><div class="no-data">No favorites found</div></div>
+            </div>
+
+            <!-- Most Played View -->
+            <div class="tab-view" id="remote-mostplayed-view-container">
+                <h3 class="view-title"><i class="fa-solid fa-fire"></i> Most Played History</h3>
+                <div class="tracks-list" id="remote-mostplayed-list"><div class="no-data">No history found</div></div>
+            </div>
+
+            <!-- Moods View -->
+            <div class="tab-view" id="remote-moods-view-container">
+                <h3 class="view-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Vibe Playlists</h3>
+                <div class="mood-tabs-header">
+                    <button id="mood-btn-calm" class="mood-btn" style="background: rgba(6,182,212,0.1); color: var(--accent-cyan);">Calm & Smooth</button>
+                    <button id="mood-btn-vocals" class="mood-btn">Vocals</button>
+                    <button id="mood-btn-bgm" class="mood-btn">Instrumentals</button>
+                </div>
+                <div class="tracks-list" id="remote-moods-list"><div class="no-data">Select a vibe preset above</div></div>
+            </div>
+
+            <!-- DSP View -->
+            <div class="tab-view" id="remote-dsp-view-container">
+                <h3 class="view-title"><i class="fa-solid fa-sliders"></i> Neural DSP Effects</h3>
+                <div class="dsp-panel">
+                    <div class="dsp-global-toggle-row">
+                        <span class="dsp-switch-label">Global DSP Bypass</span>
+                        <label class="dsp-switch"><input type="checkbox" id="remote-dsp-bypass"><span class="dsp-slider-round"></span></label>
+                    </div>
+                    <div class="dsp-control-row">
+                        <div class="dsp-control-header"><label class="dsp-control-title"><input type="checkbox" id="remote-cb-bass" checked style="margin-right: 8px;"> Bass Boost (Sub-Bass)</label><span class="dsp-control-val" id="remote-val-bass">60%</span></div>
+                        <input type="range" class="dsp-slider-input" id="remote-slider-bass" min="0" max="100" value="60">
+                    </div>
+                    <div class="dsp-control-row">
+                        <div class="dsp-control-header"><label class="dsp-control-title"><input type="checkbox" id="remote-cb-mid" checked style="margin-right: 8px;"> Mid-Range / Neural EQ</label><span class="dsp-control-val" id="remote-val-mid">50%</span></div>
+                        <input type="range" class="dsp-slider-input" id="remote-slider-mid" min="0" max="100" value="50">
+                    </div>
+                    <div class="dsp-control-row">
+                        <div class="dsp-control-header"><label class="dsp-control-title"><input type="checkbox" id="remote-cb-vocals" checked style="margin-right: 8px;"> Vocal Clarity & Presence</label><span class="dsp-control-val" id="remote-val-vocals">50%</span></div>
+                        <input type="range" class="dsp-slider-input" id="remote-slider-vocals" min="0" max="100" value="50">
+                    </div>
+                    <div class="dsp-control-row">
+                        <div class="dsp-control-header"><label class="dsp-control-title"><input type="checkbox" id="remote-cb-air" checked style="margin-right: 8px;"> Air Brilliance (High-Shelf)</label><span class="dsp-control-val" id="remote-val-air">30%</span></div>
+                        <input type="range" class="dsp-slider-input" id="remote-slider-air" min="0" max="100" value="30">
+                    </div>
+                    <div class="dsp-control-row">
+                        <div class="dsp-control-header"><label class="dsp-control-title"><input type="checkbox" id="remote-cb-warmth" style="margin-right: 8px;"> Analog Warmth</label><span class="dsp-control-val" id="remote-val-warmth">40%</span></div>
+                        <input type="range" class="dsp-slider-input" id="remote-slider-warmth" min="0" max="100" value="40">
+                    </div>
+                    <div class="dsp-control-row">
+                        <div class="dsp-control-header"><label class="dsp-control-title"><input type="checkbox" id="remote-cb-stereo" checked style="margin-right: 8px;"> Stereo Width expansion</label><span class="dsp-control-val" id="remote-val-stereo">100%</span></div>
+                        <input type="range" class="dsp-slider-input" id="remote-slider-stereo" min="0" max="200" value="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div class="tab-view" id="remote-settings-view-container">
+                <h3 class="view-title"><i class="fa-solid fa-gear"></i> System Settings</h3>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="background: var(--bg-panel); border: 1px solid var(--border-glass); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                        <span style="font-size: 13px; font-weight: 700; color: var(--text-high); text-transform: uppercase; letter-spacing: 1px;">Connection Status</span>
+                        <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-mid);">
+                            <span>Target Host</span>
+                            <span style="font-family: monospace;" id="settings-host-ip">Loading...</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-mid);">
+                            <span>API Version</span>
+                            <span style="font-family: monospace;">v1.4.0 (Production)</span>
+                        </div>
+                    </div>
+                    <button class="settings-btn" id="btn-remote-reload"><i class="fa-solid fa-arrow-rotate-right"></i> Reload Workstation Player</button>
+                    <button class="settings-btn danger" id="btn-remote-shutdown"><i class="fa-solid fa-power-off"></i> Shutdown Workstation</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="connection-status">
+            <span class="indicator" id="conn-indicator"></span>
+            <span id="conn-text">Offline</span>
+        </div>
+    </div>
+
+    <!-- Compact Player -->
+    <div class="compact-player" id="compact-player-bar">
+        <div class="compact-progress-mini"><div class="compact-progress-fill" id="compact-progress-fill-element"></div></div>
+        <div class="compact-info" id="compact-info-clicker">
+            <div class="compact-art-wrapper"><img class="compact-art" id="compact-cover-art" alt="Album cover art" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%231e293b'/></svg>"></div>
+            <div class="compact-meta">
+                <span class="compact-title" id="compact-track-title">No Track Playing</span>
+                <span class="compact-artist" id="compact-track-artist">Connecting to workstation</span>
+            </div>
+        </div>
+        <div class="compact-controls">
+            <button class="compact-btn" id="compact-btn-play-pause"><i class="fa-solid fa-play"></i></button>
+            <button class="compact-btn" id="compact-btn-next"><i class="fa-solid fa-forward"></i></button>
+        </div>
+    </div>
+
+    <!-- Full Player Overlay -->
+    <div class="full-player-overlay" id="full-player-view">
+        <img class="blur-backdrop" id="overlay-blur-backdrop" alt="Background backdrop blur" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%23060a13'/></svg>">
+        <div class="overlay-header">
+            <button class="btn-close-overlay" id="btn-close-player"><i class="fa-solid fa-chevron-down"></i></button>
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; color: var(--text-low);">Now Playing</span>
+            <div style="width: 40px;"></div>
+        </div>
+        <div class="overlay-body">
+            <div class="art-wrapper"><img class="large-art" id="overlay-cover-art" alt="Large album cover art" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%231e293b'/></svg>"></div>
+            <div class="overlay-meta">
+                <div class="overlay-queue-status" id="overlay-queue-status">Queue: Empty</div>
+                <div class="overlay-title" id="overlay-track-title">Loading...</div>
+                <div class="overlay-artist" id="overlay-track-artist">Connecting to workstation</div>
+
+                <!-- Audio Quality Badges Banner -->
+                <div class="overlay-aq-banner" style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+                    <span class="aq-pill-format" id="overlay-aq-pill-format" style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; border-radius: 999px; padding: 2px 8px; font-size: 10px; font-weight: 700;"><i class="fa-solid fa-wave-square" style="font-size: 9px;"></i> FLAC</span>
+                    <span class="aq-pill-mode" id="overlay-aq-pill-mode" style="background: rgba(56,189,248,0.18); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; border-radius: 999px; padding: 2px 8px; font-size: 10px; font-weight: 700;"><i class="fa-solid fa-bolt" style="font-size: 9px;"></i> WASAPI Exclusive</span>
+                    <span class="aq-pill-specs" id="overlay-aq-pill-specs" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; border-radius: 999px; padding: 2px 8px; font-size: 10px; font-weight: 700;"><i class="fa-solid fa-microchip" style="font-size: 9px;"></i> 44.1 kHz / 16-bit</span>
+                </div>
+            </div>
+            <div class="scrubber-section">
+                <input type="range" class="scrubber-slider" id="overlay-progress-slider" min="0" max="100" value="0" step="0.1">
+                <div class="time-labels"><span id="overlay-time-current">0:00</span><span id="overlay-time-total">0:00</span></div>
+            </div>
+            <div class="large-controls">
+                <button class="btn-small" id="btn-shuffle" title="Shuffle On/Off"><i class="fa-solid fa-shuffle"></i></button>
+                <button class="btn-small mode-selector-btn" id="overlay-btn-shuffle-mode" title="Shuffle Mode: Standard / AI / Melody"><i class="fa-solid fa-dice-five"></i></button>
+
+                <button class="btn-side" id="btn-prev" title="Previous Track"><i class="fa-solid fa-backward-step"></i></button>
+                <button class="btn-play-large" id="btn-play-pause" title="Play/Pause"><i class="fa-solid fa-play"></i></button>
+                <button class="btn-side" id="btn-next" title="Next Track"><i class="fa-solid fa-forward-step"></i></button>
+
+                <button class="btn-small" id="btn-repeat" title="Repeat On/Off"><i class="fa-solid fa-repeat"></i></button>
+                <button class="btn-small mode-selector-btn" id="overlay-btn-repeat-mode" title="Repeat Mode: All / Album / Artist / One"><i class="fa-solid fa-layer-group"></i></button>
+            </div>
+
+            <!-- Secondary Actions Row (Dislike, Favorite, DSP Toggle) -->
+            <div class="overlay-secondary-row" style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 6px;">
+                <button class="control-btn-sm" id="overlay-btn-dislike" title="Dislike Track" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-glass); color: var(--text-mid); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer;"><i class="fa-regular fa-thumbs-down"></i></button>
+
+                <button class="control-btn-sm drawer-star-btn" id="overlay-btn-favorite" title="Favorite Track" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-glass); color: var(--text-mid); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer;"><i class="fa-regular fa-star"></i></button>
+
+                <button class="control-btn-sm mini-dsp-toggle-btn active" id="overlay-btn-dsp-toggle" title="Toggle DSP Audio Processing On/Off" style="background: rgba(34, 211, 238, 0.18); border: 1px solid rgba(34, 211, 238, 0.4); color: #22d3ee; border-radius: 8px; padding: 4px 12px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px;"><i class="fa-solid fa-sliders" style="font-size: 11px;"></i> DSP</button>
+            </div>
+
+            <div class="volume-section" style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 320px;">
+                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                    <button id="btn-remote-mute" style="background: none; border: none; color: var(--text-mid); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; font-size: 15px;" title="Music WASAPI Volume"><i class="fa-solid fa-music" style="color: #10b981;"></i></button>
+                    <input type="range" class="volume-slider mini-vol-slider-clean" id="overlay-volume-slider" min="0" max="100" value="80" style="flex: 1; height: 4px;">
+                    <span id="remote-volume-label" style="font-size: 12px; color: var(--accent-emerald, #10b981); font-weight: 700; min-width: 36px; text-align: right; font-family: monospace;">80%</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                    <span style="width: 28px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-desktop system-vol-icon" style="font-size: 13px;"></i></span>
+                    <input type="range" class="system-vol-slider mini-vol-slider-clean" id="overlay-system-volume-slider" min="0" max="100" value="50" style="flex: 1; height: 4px;">
+                    <span class="system-vol-pct" id="overlay-system-volume-label" style="font-size: 12px; font-weight: 700; min-width: 36px; text-align: right; font-family: monospace;">50%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+                <!-- Single Full-Width Edge-to-Edge Emerald Bottom Player Bar -->
+    <div id="mini-player-widget" class="mini-player-bar" style="position: fixed; bottom: 0; left: 0; right: 0; width: 100vw; height: 60px; margin: 0; border-radius: 0; z-index: 10000; background: #080d19; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.7); user-select: none; box-sizing: border-box;">
+        
+        <!-- Flush 100% Full-Width Top Green Progress Bar -->
+        <div id="mini-progress-bar-trigger" style="position: absolute !important; top: -1px !important; left: 0 !important; right: 0 !important; width: 100% !important; height: 4px !important; background: rgba(255, 255, 255, 0.08) !important; cursor: pointer !important; z-index: 10001 !important;">
+            <div id="mini-progress-bar-fill" style="width: 100%; height: 100%; background: #10b981; box-shadow: 0 0 10px #10b981; transform-origin: left center; transform: scaleX(0); will-change: transform; transition: none;"></div>
+        </div>
+
+        <!-- Left: Track Art & Title Info -->
+        <div class="mini-player-info-group" style="display: flex; align-items: center; gap: 10px; width: 22%; min-width: 150px; flex-shrink: 1; overflow: hidden; cursor: pointer;" title="Toggle Full Player View">
+            <img id="mini-player-art" src="active_art.jpg" alt="Art" style="width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.12); flex-shrink: 0;">
+            <div style="flex: 1; min-width: 0;">
+                <div id="mini-player-title" style="font-size: 12.5px; font-weight: 700; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">No Track Selected</div>
+                <div id="mini-player-artist" style="font-size: 11px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;">Unknown Artist</div>
+                <span id="mini-aq-pill-format" style="display:none;"></span>
+                <span id="mini-aq-pill-mode" style="display:none;"></span>
+                <span id="mini-aq-pill-specs" style="display:none;"></span>
+            </div>
+        </div>
+
+        <!-- Center: Playback Control Buttons -->
+        <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+            <button class="control-btn-sm" id="mini-btn-shuffle" title="Shuffle On/Off" style="background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 14px; transition: color 0.2s;"><i class="fa-solid fa-shuffle"></i></button>
+            <button class="control-btn-sm mode-selector-btn" id="mini-btn-shuffle-mode" title="Shuffle Mode: Standard / AI / Melody"><i class="fa-solid fa-dice-five"></i></button>
+
+            <button class="control-btn-sm" id="mini-btn-prev" title="Previous Track" style="background: transparent; border: none; color: #cbd5e1; cursor: pointer; font-size: 15px; transition: color 0.2s;"><i class="fa-solid fa-backward-step"></i></button>
+
+            <button class="control-btn-sm play-btn" id="mini-btn-play" title="Play / Pause" style="width: 34px; height: 34px; border-radius: 50%; background: #10b981; border: none; color: white; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); transition: transform 0.15s ease;"><i class="fa-solid fa-play"></i></button>
+
+            <button class="control-btn-sm" id="mini-btn-next" title="Next Track" style="background: transparent; border: none; color: #cbd5e1; cursor: pointer; font-size: 15px; transition: color 0.2s;"><i class="fa-solid fa-forward-step"></i></button>
+
+            <button class="control-btn-sm" id="mini-btn-repeat" title="Repeat On/Off" style="background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 14px; transition: color 0.2s;"><i class="fa-solid fa-repeat"></i></button>
+            <button class="control-btn-sm mode-selector-btn" id="mini-btn-repeat-mode" title="Repeat Mode: All / Album / Artist / One"><i class="fa-solid fa-layer-group"></i></button>
+
+            <button class="control-btn-sm" id="mini-btn-dislike" title="Dislike Track" style="background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 14px; transition: color 0.2s;"><i class="fa-regular fa-thumbs-down"></i></button>
+
+            <button class="control-btn-sm" id="mini-btn-favorite" title="Favorite Track" style="background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 14px; transition: color 0.2s;"><i class="fa-regular fa-star"></i></button>
+
+            <button class="control-btn-sm mini-dsp-toggle-btn active" id="mini-btn-dsp-toggle" title="Toggle DSP Audio Processing On/Off" style="background: rgba(34, 211, 238, 0.18); border: 1px solid rgba(34, 211, 238, 0.4); color: #22d3ee; border-radius: 6px; padding: 2px 6px; font-size: 10px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; transition: all 0.2s; white-space: nowrap; margin: 0 2px;">
+                <i class="fa-solid fa-sliders" style="font-size: 10px;"></i> <span>DSP</span>
+            </button>
+
+            <button class="control-btn-sm btn-toggle-player" id="btn-toggle-player" title="Full Player Drawer" style="background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 14px; transition: color 0.2s;"><i class="fa-solid fa-expand"></i></button>
+        </div>
+
+        <!-- Right: Dual Volume Sliders & Timer -->
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-shrink: 0;">
+            <div id="mini-time-container" style="font-size: 11px; font-weight: 600; color: #94a3b8; font-family: monospace; white-space: nowrap; text-align: right;">
+                <span id="mini-time-current">00:00</span> <span class="time-sep">/</span> <span id="mini-time-total">00:00</span>
+            </div>
+            <div class="mini-volume-controls" style="display: flex; align-items: center; gap: 8px;">
+                <div class="mini-volume-control" style="display: flex; align-items: center; gap: 5px; width: 75px;" title="Sonar Exclusive WASAPI Volume">
+                    <i class="fa-solid fa-music" style="font-size: 11px; color: #10b981;"></i>
+                    <input type="range" id="mini-audio-volume-slider" class="mini-vol-slider-clean" min="0" max="100" step="1" value="80" style="flex: 1; height: 3px; cursor: pointer; min-width: 0; border-radius: 2px;">
+                </div>
+                <div class="mini-volume-control" style="display: flex; align-items: center; gap: 5px; width: 75px;" title="System / Null Target Device Volume">
+                    <i class="fa-solid fa-desktop" style="font-size: 11px; color: #38bdf8;"></i>
+                    <input type="range" id="mini-system-volume-slider" class="mini-vol-slider-clean" min="0" max="100" step="1" value="100" style="flex: 1; height: 3px; cursor: pointer; min-width: 0; border-radius: 2px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Track Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; backdrop-filter: blur(6px);">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 24px; max-width: 420px; width: 90%; box-shadow: var(--shadow-premium);">
+            <h3 id="delete-modal-title" style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: #f87171;"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Delete</h3>
+            <p id="delete-modal-msg" style="font-size: 13px; color: var(--text-high); margin-bottom: 16px;">Are you sure you want to remove this track from your music database?</p>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">
+                <input type="checkbox" id="delete-modal-file-chk" style="accent-color: #f87171;"> Also delete physical audio file from disk
+            </label>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="action-btn-sm" id="btn-delete-cancel" style="padding: 8px 16px;">Cancel</button>
+                <button class="action-btn-sm" id="btn-delete-confirm" style="background: #ef4444; color: white; padding: 8px 16px;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extended Acoustic Analysis Modal -->
+    <div id="extended-analysis-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 24px; max-width: 800px; width: 90%; max-height: 85vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 id="modal-track-title" style="margin: 0; font-size: 16px; font-weight: 700; color: var(--accent-cyan);">Acoustic Profile</h3>
+                <button class="icon-btn-sm" id="btn-close-extended-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-extended-heatmap-container" style="min-height: 300px; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 16px;"></div>
+        </div>
+    </div>
+
+    <!-- Sample Rate Warning Modal -->
+    <div id="sample-rate-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.7); align-items: center; justify-content: center;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 14px; padding: 20px; max-width: 400px; width: 90%;">
+            <p id="sample-rate-modal-msg" style="font-size: 13px; color: var(--text-high);"></p>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+                <button class="action-btn-sm" id="sr-modal-btn-shared">Shared Mode</button>
+                <button class="action-btn-sm" id="sr-modal-btn-default">Match Default</button>
+                <button class="action-btn-sm" id="sr-modal-btn-close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MusicBee In-App Metadata Tag Editor Modal -->
+    <div id="tag-editor-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.75); align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 24px; max-width: 520px; width: 90%; box-shadow: var(--shadow-premium);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-tags"></i> Edit Track Metadata Tags</h3>
+                <button class="icon-btn-sm" id="btn-tag-edit-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <input type="hidden" id="tag-edit-id">
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 11px; margin-bottom: 4px; font-weight: 600;">TITLE</label>
+                    <input type="text" id="tag-edit-title" class="search-input" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 8px; padding: 8px 12px; color: var(--text-high);">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 11px; margin-bottom: 4px; font-weight: 600;">ARTIST</label>
+                        <input type="text" id="tag-edit-artist" class="search-input" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 8px; padding: 8px 12px; color: var(--text-high);">
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 11px; margin-bottom: 4px; font-weight: 600;">ALBUM</label>
+                        <input type="text" id="tag-edit-album" class="search-input" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 8px; padding: 8px 12px; color: var(--text-high);">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 11px; margin-bottom: 4px; font-weight: 600;">GENRE</label>
+                        <input type="text" id="tag-edit-genre" class="search-input" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 8px; padding: 8px 12px; color: var(--text-high);">
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 11px; margin-bottom: 4px; font-weight: 600;">YEAR</label>
+                        <input type="number" id="tag-edit-year" class="search-input" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 8px; padding: 8px 12px; color: var(--text-high);">
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 11px; margin-bottom: 4px; font-weight: 600;">TRACK #</label>
+                        <input type="number" id="tag-edit-track" class="search-input" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: 8px; padding: 8px 12px; color: var(--text-high);">
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="action-btn-sm" id="btn-tag-edit-cancel" style="padding: 8px 16px;">Cancel</button>
+                <button class="action-btn-sm" id="btn-tag-edit-save" style="background: var(--accent-cyan); color: #0f172a; font-weight: 700; padding: 8px 20px;"><i class="fa-solid fa-floppy-disk"></i> Save Tags to Disk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Container v2 -->
+    <div id="recommendations-container-v2" style="display: none;"></div>
+
+    <!-- Disliked Tracks Drawer Table Body -->
+    <div id="sonar-debug-overlay" style="display: none;"></div>
+    <input type="range" id="system-volume-slider" style="display:none;"><span id="system-volume-val" style="display:none;">100%</span>
+    <!-- Hidden bridge elements for Mobile Remote EQ JS compatibility -->
+    <select id="mr-eq-preset-select" style="display:none;"></select>
+    <input type="text" id="mr-eq-save-name" style="display:none;">
+    <button id="mr-eq-btn-save" style="display:none;"></button>
+    <!-- Fullscreen Presentation Overlay -->
+    <div id="fullscreen-overlay" class="fullscreen-overlay" style="display: none;">
+        <button id="btn-fullscreen-close" class="fullscreen-close-btn" title="Exit Fullscreen Presentation"><i class="fa-solid fa-xmark"></i></button>
+
+        <div class="fullscreen-layout">
+            <!-- LEFT PANEL: Track Info, Cover Art & Controls -->
+            <div class="fullscreen-left">
+                <div class="fs-art-wrapper">
+                    <img id="fs-album-art" src="" alt="Album Art">
+                </div>
+                <h1 id="fs-track-title" class="fs-title">Track Title</h1>
+                <p id="fs-track-artist" class="fs-artist">Artist Name</p>
+
+                <div class="fs-player-controls">
+                    <button class="control-btn" id="fs-btn-prev" title="Previous"><i class="fa-solid fa-backward-step"></i></button>
+                    <button class="control-btn play-btn" id="fs-btn-play-pause" title="Play/Pause"><i class="fa-solid fa-play"></i></button>
+                    <button class="control-btn" id="fs-btn-next" title="Next"><i class="fa-solid fa-forward-step"></i></button>
+                    <button class="control-btn" id="fs-btn-shuffle" title="Shuffle"><i class="fa-solid fa-shuffle"></i></button>
+                    <button class="control-btn mode-selector-btn" id="fs-btn-shuffle-mode" title="Shuffle Mode: Standard / AI / Melody"><i class="fa-solid fa-dice-five"></i></button>
+                    <button class="control-btn" id="fs-btn-repeat" title="Repeat"><i class="fa-solid fa-repeat"></i></button>
+                    <button class="control-btn mode-selector-btn" id="fs-btn-repeat-mode" title="Repeat Mode: All / Album / Artist / One"><i class="fa-solid fa-layer-group"></i></button>
+                </div>
+
+                <div class="fs-specs-container">
+                    <div class="fs-spec-row header-spec">
+                        <span class="fs-label">AUDIO SPECIFICATIONS & TELEMETRY</span>
+                        <span class="fs-value" id="fs-val-format">FLAC</span>
+                        <span class="fs-value" id="fs-stat-format" style="display:none;">FLAC</span>
+                    </div>
+                    <div class="fs-spec-row">
+                        <span class="fs-label">BPM</span>
+                        <span class="fs-value" id="fs-val-bpm">120 BPM</span>
+                    </div>
+                    <div class="fs-spec-row">
+                        <span class="fs-label">DYNAMIC RANGE</span>
+                        <span class="fs-value" id="fs-val-dr">11.24 dB</span>
+                    </div>
+                    <div class="fs-spec-row">
+                        <span class="fs-label">SAMPLE RATE</span>
+                        <span class="fs-value" id="fs-stat-samplerate">44.1 kHz / 16-bit</span>
+                    </div>
+                    <div class="fs-spec-row">
+                        <span class="fs-label">BITRATE</span>
+                        <span class="fs-value" id="fs-stat-bitrate">1411 kbps</span>
+                    </div>
+                    <div class="fs-spec-row">
+                        <span class="fs-label">PEAK SIGNAL</span>
+                        <span class="fs-value" id="fs-stat-peak">L: -0.8 dB | R: -1.1 dB</span>
+                    </div>
+                    <div class="fs-spec-row">
+                        <span class="fs-label">AFFINITY</span>
+                        <span class="fs-value" id="fs-stat-affinity">+5.0 (Standard)</span>
+                    </div>
+                    <div class="fs-spec-row full-width-spec" style="grid-column: span 2;">
+                        <span class="fs-label">PLAYS / SKIPS</span>
+                        <span class="fs-value" id="fs-stat-playskips">0 plays / 0 skips</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTER PANEL: Synchronized Karaoke Lyrics -->
+            <div class="fullscreen-center">
+                <div id="fs-lyrics-container" class="fs-lyrics-container">
+                    <div id="fs-lyrics-content" class="fs-lyrics-text">
+                        <span class="no-lyrics">Synchronized Lyrics View</span>
+                    </div>
+                </div>
+            </div>
+
+
+    <!-- MusicBee Custom Context Menu -->
+    <div id="musicbee-context-menu" style="display: none;">
+        <div class="ctx-item" id="ctx-play-now"><i class="fa-solid fa-play" style="color: #007acc;"></i> Play Now</div>
+        <div class="ctx-item" id="ctx-queue-next"><i class="fa-solid fa-arrow-turn-down"></i> Queue Next</div>
+        <div class="ctx-item" id="ctx-add-queue"><i class="fa-solid fa-list-ol"></i> Add to Queue</div>
+        <div class="ctx-separator"></div>
+        <div class="ctx-item" id="ctx-edit-tags"><i class="fa-solid fa-tags" style="color: #f59e0b;"></i> Edit Tags (Ctrl+E)</div>
+        <div class="ctx-item" id="ctx-show-lyrics"><i class="fa-solid fa-microphone" style="color: #06b6d4;"></i> Show Synced Lyrics</div>
+        <div class="ctx-item" id="ctx-toggle-fav"><i class="fa-solid fa-heart" style="color: #f43f5e;"></i> Toggle Favorite</div>
+        <div class="ctx-separator"></div>
+        <div class="ctx-item" id="ctx-harmonic-dj"><i class="fa-solid fa-compact-disc" style="color: #a855f7;"></i> Find Harmonic DJ Matches</div>
+    </div>
+
+    <!-- App JS controller -->
+    <script src="app.js?v=3.1.0"></script>
+</body>
+
+</html>

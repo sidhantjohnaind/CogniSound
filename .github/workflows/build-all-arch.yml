@@ -1,0 +1,87 @@
+name: Multi-Architecture Build Matrix (AMD64 / ARM64 / RISC-V)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-multi-arch:
+    name: Build ${{ matrix.target }} (${{ matrix.arch_name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # AMD64 (x86_64) Targets
+          - target: x86_64-pc-windows-msvc
+            arch_name: amd64-windows
+            os: windows-latest
+            use_cross: false
+          - target: x86_64-unknown-linux-gnu
+            arch_name: amd64-linux
+            os: ubuntu-latest
+            use_cross: false
+
+          # ARM64 (aarch64) Targets
+          - target: aarch64-unknown-linux-gnu
+            arch_name: arm64-linux
+            os: ubuntu-latest
+            use_cross: true
+          - target: aarch64-pc-windows-msvc
+            arch_name: arm64-windows
+            os: windows-latest
+            use_cross: false
+
+          # RISC-V (riscv64) Targets
+          - target: riscv64gc-unknown-linux-gnu
+            arch_name: riscv64-linux
+            os: ubuntu-latest
+            use_cross: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust_server -> target"
+          key: ${{ matrix.target }}
+
+      - name: Install Cross (for containerized cross-compilation)
+        if: ${{ matrix.use_cross }}
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build Binaries with Standard Cargo
+        if: ${{ !matrix.use_cross }}
+        run: |
+          cargo build --release --target ${{ matrix.target }} --manifest-path rust_server/Cargo.toml --bins
+
+      - name: Build Binaries with Cross (ARM64 / RISC-V Linux)
+        if: ${{ matrix.use_cross }}
+        run: |
+          cross build --release --target ${{ matrix.target }} --manifest-path rust_server/Cargo.toml --bins
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-${{ matrix.arch_name }}
+          path: |
+            target/${{ matrix.target }}/release/rust_server*
+            target/${{ matrix.target }}/release/db_scanner*
+            target/${{ matrix.target }}/release/stem_analyzer*
+            target/${{ matrix.target }}/release/classify_tracks*
+            target/${{ matrix.target }}/release/compute_melody_twins*
+            target/${{ matrix.target }}/release/generate_timelines*

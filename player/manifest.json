@@ -1,0 +1,21 @@
+{
+  "name": "Hi-Fi Music Player",
+  "short_name": "Music Player",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060a13",
+  "theme_color": "#10b981",
+  "description": "High-Fidelity Audio Player & Remote",
+  "icons": [
+    {
+      "src": "/active_art.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/active_art.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

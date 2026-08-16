@@ -1,0 +1,73 @@
+# ==========================================
+# Sonar Music Player - .gitignore
+# ==========================================
+
+# Rust Build & Target Outputs
+target/
+**/target/
+**/target/**
+**/target*/**
+target2/
+**/target2/
+**/target2/**
+target_build/
+**/target_build/
+**/target_build/**
+target_cli/
+**/target_cli/
+**/target_cli/**
+*.exe
+*.dll
+*.pdb
+*.rlib
+*.so
+*.dylib
+*.d
+
+# Databases & Runtime State
+*.db
+*.db-*
+*.db.bak
+*.sqlite
+*.sqlite3
+*.pkl
+now_playing.txt
+now_playing.json
+processing_state.json
+progress_*.txt
+traceback.txt
+
+# Caches & Local Tool Dependencies
+.cache/
+.art_cache/
+.lyrics-tools/
+.token-savior-cache.json
+graphify-out/
+.backups/
+backups/
+scratch/
+temp/
+
+# Logs & Dumps
+*.log
+*.out.log
+*.err.log
+*.dump
+
+# Archives & Temporary Artifacts
+*.zip
+*.7z
+*.tar.gz
+*.rar
+*.bak
+
+# OS & Editor Specific Files
+.vscode/
+.idea/
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+*.swo
+*~

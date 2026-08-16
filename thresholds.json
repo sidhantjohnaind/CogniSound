@@ -1,0 +1,100 @@
+{
+  "strings": {
+    "low_max": 0.4164,
+    "mid_max": 0.5374,
+    "n": 245,
+    "min": 0.0495,
+    "max": 0.7979
+  },
+  "piano": {
+    "low_max": 0.5351,
+    "mid_max": 0.6514,
+    "n": 245,
+    "min": 0.0,
+    "max": 0.8353
+  },
+  "drums": {
+    "low_max": 0.5494,
+    "mid_max": 0.6272,
+    "n": 245,
+    "min": 0.0,
+    "max": 0.8058
+  },
+  "choir": {
+    "low_max": 0.0,
+    "mid_max": 0.6085,
+    "n": 245,
+    "min": 0.0,
+    "max": 0.8851
+  },
+  "guitar": {
+    "low_max": 0.0023,
+    "mid_max": 0.2974,
+    "n": 245,
+    "min": 0.0,
+    "max": 0.644
+  },
+  "bass": {
+    "low_max": 0.0991,
+    "mid_max": 0.3952,
+    "n": 245,
+    "min": 0.0,
+    "max": 0.8231
+  },
+  "winds": {
+    "low_max": 0.0,
+    "mid_max": 0.0,
+    "n": 245,
+    "min": 0.0,
+    "max": 0.2539
+  },
+  "synth": {
+    "low_max": 0.0,
+    "mid_max": 0.0076,
+    "n": 245,
+    "min": 0.0,
+    "max": 0.2556
+  },
+  "brass": {
+    "low_max": 0.0056,
+    "mid_max": 0.0668,
+    "n": 245,
+    "min": 0.0,
+    "max": 0.4355
+  },
+  "dreaminess": {
+    "low_max": 0.4716,
+    "mid_max": 0.6072,
+    "n": 245,
+    "min": 0.372,
+    "max": 0.6627
+  },
+  "epicness": {
+    "low_max": 0.3172,
+    "mid_max": 0.455,
+    "n": 245,
+    "min": 0.1399,
+    "max": 0.5869
+  },
+  "cinematicness": {
+    "low_max": 0.3725,
+    "mid_max": 0.4642,
+    "n": 245,
+    "min": 0.1578,
+    "max": 0.5993
+  },
+  "electronicness": {
+    "low_max": 0.1616,
+    "mid_max": 0.1881,
+    "n": 245,
+    "min": 0.0534,
+    "max": 0.6256
+  },
+  "nostalgia": {
+    "low_max": 0.3947,
+    "mid_max": 0.487,
+    "n": 245,
+    "min": 0.2606,
+    "max": 0.8021
+  }
+}
