@@ -126,17 +126,30 @@ pub async fn get_themes(
 ) -> Result<Json<Value>, (StatusCode, String)> {
     let conn = state.db.get_connection().map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
     let mut stmt = conn.prepare(
-        "SELECT COALESCE(theme_family_id, 'General') as theme, COUNT(*) as count
+        "SELECT 
+            COALESCE(NULLIF(theme_family_id, ''), NULLIF(genre, ''), NULLIF(genre_category, ''), 'Cinematic Soundtrack') as theme,
+            COUNT(*) as count,
+            MIN(id) as sample_track_id,
+            COALESCE(MIN(artist), 'Various Artists') as sample_artist
          FROM tracks
-         WHERE theme_family_id IS NOT NULL AND theme_family_id != ''
          GROUP BY theme
-         ORDER BY count DESC"
+         ORDER BY count DESC
+         LIMIT 50"
     ).map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
     let rows = stmt.query_map([], |r| {
         let theme: String = r.get(0)?;
         let count: i64 = r.get(1)?;
-        Ok(json!({ "theme": theme, "count": count }))
+        let sample_id: i64 = r.get(2)?;
+        let artist: String = r.get(3)?;
+        Ok(json!({
+            "theme": theme,
+            "theme_name": theme,
+            "count": count,
+            "track_count": count,
+            "sample_track_id": sample_id,
+            "sample_artist": artist
+        }))
     }).map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
     let mut themes = Vec::new();
@@ -146,7 +159,7 @@ pub async fn get_themes(
         }
     }
 
-    Ok(Json(json!({ "success": true, "themes": themes })))
+    Ok(Json(json!({ "success": true, "themes": themes, "data": themes })))
 }
 
 #[derive(Deserialize)]

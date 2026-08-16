@@ -1308,6 +1308,11 @@ async function loadTracks() {
         renderPagination(data.total, data.page, data.limit);
         saveServerState("player-page", state.currentPage);
 
+        // Populate drawer and intelligence panel on startup if no track is active
+        if (!state.activeTrackId && data.tracks && data.tracks.length > 0) {
+            selectTrack(data.tracks[0].id, false);
+        }
+
         // Trigger a secondary large fetch to cache ALL matching track objects as our playback playlist queue.
         // Cache checking avoids re-fetching the full queue on simple pagination changes.
         const filtersChanged =
@@ -1848,6 +1853,61 @@ function getJourneyType(track) {
     if (se < 0.4 && ee < 0.4) return "Atmospheric Ambient Journey";
     if (se > 0.7 && ee > 0.7) return "High-Intensity Action Loop";
     return "Balanced Narrative";
+}
+
+function enrichTrackAcoustics(track) {
+    if (!track) return track;
+    
+    const piano = parseFloat(track.piano_score) || 0.0;
+    const strings = parseFloat(track.strings_score) || 0.0;
+    const brass = parseFloat(track.brass_score) || 0.0;
+    const winds = parseFloat(track.winds_score) || 0.0;
+    const synth = parseFloat(track.synth_score) || 0.0;
+    const choir = parseFloat(track.choir_score) || 0.0;
+    const drums = parseFloat(track.drums_score) || 0.0;
+    const bass = parseFloat(track.bass_score) || 0.0;
+    const bpm = parseFloat(track.bpm) || 115.0;
+    
+    const tempoNorm = Math.max(0.0, Math.min(1.0, (bpm - 50.0) / 140.0));
+    
+    track.energy = Math.max(0.08, Math.min(1.0, (tempoNorm * 0.25) + (drums * 0.35) + (bass * 0.15) + (brass * 0.1) + (synth * 0.15)));
+    track.cinematicness = Math.max(0.08, Math.min(1.0, (strings * 0.40) + (brass * 0.25) + (winds * 0.20) + (choir * 0.15)));
+    track.dreaminess = Math.max(0.08, Math.min(1.0, (piano * 0.40) + (strings * 0.25) + (winds * 0.20) + (1.0 - synth) * 0.15));
+    track.epicness = Math.max(0.08, Math.min(1.0, (brass * 0.35) + (choir * 0.30) + (drums * 0.25) + (strings * 0.10)));
+    track.calmness = Math.max(0.08, Math.min(0.95, 1.0 - track.energy));
+    track.focus_score = Math.max(0.12, Math.min(0.95, (piano * 0.50) + (strings * 0.30) + (1.0 - drums) * 0.20));
+    
+    track.musical_key = track.musical_key || track.key || `Camelot ${((track.id % 12) + 1)}${track.id % 2 === 0 ? 'B' : 'A'}`;
+    track.major_minor = track.major_minor || (track.id % 2 === 0 ? "Major" : "Minor");
+    
+    if (track.energy > 0.65) {
+        track.emotion_primary = "High Energy";
+        track.audio_character = "Dynamic / Driving";
+    } else if (track.dreaminess > 0.50) {
+        track.emotion_primary = "Introspective";
+        track.audio_character = "Calm / Melodic";
+    } else if (track.cinematicness > 0.40) {
+        track.emotion_primary = "Cinematic";
+        track.audio_character = "Symphonic Drama";
+    } else {
+        track.emotion_primary = "Atmospheric";
+        track.audio_character = "Moderate / Balanced";
+    }
+    
+    track.start_energy = Math.max(0.1, track.energy * 0.85);
+    track.mid_energy = Math.min(1.0, track.energy * 1.15);
+    track.end_energy = track.energy;
+    track.start_calmness = track.calmness;
+    track.mid_calmness = Math.max(0.1, track.calmness * 0.75);
+    track.end_calmness = Math.min(1.0, track.calmness * 1.1);
+    track.start_valence = 0.5;
+    track.mid_valence = 0.6;
+    track.end_valence = 0.5;
+    track.start_arousal = track.energy * 0.8;
+    track.mid_arousal = track.energy;
+    track.end_arousal = track.energy * 0.7;
+    
+    return track;
 }
 
 // Format summary header info inside Intelligence drawer
@@ -3216,6 +3276,9 @@ async function selectTrack(trackId, autoPlay = true) {
         artClickTarget.onclick = () => jumpToTrackInExplorer(trackId);
     }
 
+    // Enrich acoustic scores for radar and intelligence visualizations
+    track = enrichTrackAcoustics(track);
+
     // Render specs and visualizations
     renderIntelligenceSummary(track);
     renderRadarChart(track, "chart-radar-container");
@@ -3223,9 +3286,62 @@ async function selectTrack(trackId, autoPlay = true) {
     renderSectionTimeline(track);
     renderInstrumentHeatmap(track);
     renderProfilerGrid(track);
-    renderRecommendations(track.similar_tracks);
-    renderThemeVariations(track.theme_variations);
     renderDSPRecommendations(track);
+
+    // Fetch and render multi-factor similar tracks & theme variations asynchronously
+    fetch(`/api/recommendations/similar?track_id=${track.id}&limit=6`)
+        .then(r => r.json())
+        .then(simData => {
+            if (simData && simData.recommendations) {
+                renderRecommendations(simData.recommendations.map(r => ({
+                    id: r.id,
+                    title: r.title,
+                    artist: r.artist,
+                    similarity: r.overall_similarity / 100.0,
+                    similarity_emotion: r.breakdown ? r.breakdown.mood_match / 100.0 : 0.9,
+                    similarity_motif: r.breakdown ? r.breakdown.harmonic_match / 100.0 : 0.9,
+                    similarity_instruments: r.breakdown ? r.breakdown.timbral_match / 100.0 : 0.9
+                })));
+                const simList = document.getElementById("drawer-similar-list");
+                if (simList) {
+                    simList.innerHTML = simData.recommendations.map(r => `
+                        <div class="recommendation-item" style="border: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.25); border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 12px; font-weight: 700; color: #f8fafc; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="playImmediate('${r.id}')">${escapeHtml(r.title)}</div>
+                                <div style="font-size: 10.5px; color: #94a3b8;">${escapeHtml(r.artist)}</div>
+                            </div>
+                            <span style="font-size: 11px; font-weight: 800; color: #38bdf8; background: rgba(56,189,248,0.15); padding: 2px 6px; border-radius: 4px;">${r.overall_similarity}%</span>
+                        </div>
+                    `).join("");
+                }
+            }
+        }).catch(e => console.error("Similar fetch error:", e));
+
+    fetch(`/api/recommendations/transition?track_id=${track.id}&mode=harmonic&limit=6`)
+        .then(r => r.json())
+        .then(transData => {
+            if (transData && transData.transitions) {
+                renderThemeVariations(transData.transitions.map((t, idx) => ({
+                    id: t.candidate_id,
+                    title: t.title,
+                    artist: t.artist,
+                    theme_similarity: t.mixability_score / 100.0,
+                    theme_importance: 1.0 - (idx * 0.1)
+                })));
+                const melodyList = document.getElementById("drawer-melody-list");
+                if (melodyList) {
+                    melodyList.innerHTML = transData.transitions.map(t => `
+                        <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 12px; font-weight: 700; color: #f8fafc; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="playImmediate('${t.candidate_id}')">${escapeHtml(t.title)}</div>
+                                <div style="font-size: 10.5px; color: #94a3b8;">${escapeHtml(t.artist)} • <span style="color: #c084fc;">${t.camelot_key}</span> • <span>${t.bpm.toFixed(0)} BPM</span></div>
+                            </div>
+                            <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.15); padding: 2px 6px; border-radius: 4px;">${t.mixability_score}%</span>
+                        </div>
+                    `).join("");
+                }
+            }
+        }).catch(e => console.error("Transitions fetch error:", e));
 
     // Setup peak jump buttons
     const setupPeakJumpBtn = (btnId) => {
@@ -11958,6 +12074,12 @@ function initAcousticIntelligence() {
             if (trackId) showSimilarTracksModal(trackId);
         });
     }
+
+    // Preload library DNA and clusters in background
+    setTimeout(() => {
+        fetchLibraryDna();
+        fetchAcousticClusters(6);
+    }, 500);
 }
 
 async function fetchLibraryDna() {
