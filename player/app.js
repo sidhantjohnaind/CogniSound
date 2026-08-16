@@ -1960,6 +1960,28 @@ function renderIntelligenceSummary(track) {
         <div class="meta-stats" style="margin-top: 8px;"><i class="fa-solid fa-route"></i> Journey: <strong class="text-accent">${journey}</strong></div>
         <div class="meta-stats"><i class="fa-solid fa-fire"></i> Climax: ${peakStr} (Strength: ${((track.climax_strength || 0) * 100).toFixed(0)}%)</div>
         
+        <!-- Recommendation Engines Quick Launch Block -->
+        <div style="margin-top: 12px; padding: 10px; background: rgba(0,0,0,0.35); border: 1px solid rgba(168,85,247,0.3); border-radius: 8px;">
+            <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #cbd5e1; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                <span><i class="fa-solid fa-wand-magic-sparkles" style="color: #c084fc; margin-right: 4px;"></i> AI Recommendation Engines</span>
+                <span style="font-size: 9px; color: #10b981; font-weight: 700; background: rgba(16,185,129,0.15); padding: 1px 5px; border-radius: 4px;">RUST NATIVE</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <button onclick="startInfiniteFlowRadio(${track.id})" style="padding: 7px 6px; font-size: 11px; font-weight: 700; background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;" title="Start Spotify/Deezer style continuous smart flow radio">
+                    <i class="fa-solid fa-tower-broadcast"></i> Flow Radio
+                </button>
+                <button onclick="openDjTransitionsModal(${track.id})" style="padding: 7px 6px; font-size: 11px; font-weight: 700; background: rgba(168, 85, 247, 0.18); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;" title="Find harmonic DJ transitions & beatmatches">
+                    <i class="fa-solid fa-compact-disc"></i> Harmonic DJ
+                </button>
+                <button onclick="showSimilarTracksModal(${track.id})" style="padding: 7px 6px; font-size: 11px; font-weight: 700; background: rgba(56, 189, 248, 0.18); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;" title="Multi-factor acoustic vector similarity">
+                    <i class="fa-solid fa-dna"></i> Similar DNA
+                </button>
+                <button onclick="switchWorkspace('workspace-vibe-clusters')" style="padding: 7px 6px; font-size: 11px; font-weight: 700; background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;" title="Rayon parallel K-Means++ sound clusters">
+                    <i class="fa-solid fa-brain"></i> Sound Clusters
+                </button>
+            </div>
+        </div>
+
         <div class="vibe-stat-block" style="margin-top: 10px; margin-bottom: 0;">
             <div class="stat-header" style="font-size: 11px; margin-bottom: 4px;">
                 <span class="label"><i class="fa-solid fa-square-poll-vertical"></i> Analysis Quality</span>
