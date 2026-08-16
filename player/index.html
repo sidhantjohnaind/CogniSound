@@ -113,7 +113,7 @@
                         <i class="fa-solid fa-sliders"></i>
                         <span>Neural DSP Effects</span>
                     </a>
-                    <a href="#" class="nav-item" id="btn-open-lyrics" onclick="if(typeof loadTrackLyrics === 'function' && state.activeTrackId) loadTrackLyrics(state.activeTrackId); document.getElementById('fullscreen-overlay').style.display='flex';">
+                    <a href="#" class="nav-item" id="btn-open-lyrics" onclick="if(typeof openFullscreenVisualizer === 'function') openFullscreenVisualizer();">
                         <i class="fa-solid fa-microphone" style="color: #06b6d4;"></i>
                         <span>Karaoke Synced Lyrics</span>
                     </a>
@@ -825,6 +825,7 @@
                     </div>
                 </div>
             </div>
+        </div>
 
             <!-- WORKSPACE: Acoustic Vibes & AI Clusters -->
             <div class="workspace-panel" id="workspace-vibe-clusters" style="display: none; height: 100%; overflow-y: auto; padding: 20px 24px; box-sizing: border-box;">

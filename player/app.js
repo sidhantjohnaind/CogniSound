@@ -895,9 +895,9 @@ function switchWorkspace(targetWorkspace, targetSubtab = null, shouldPushState =
 
     // Handle special overlay & modal requests from header bar
     if (targetWorkspace === "workspace-lyrics" || targetWorkspace === "fullscreen-overlay") {
-        if (typeof loadTrackLyrics === "function" && state.activeTrackId) loadTrackLyrics(state.activeTrackId);
-        const overlay = document.getElementById("fullscreen-overlay");
-        if (overlay) overlay.style.display = "flex";
+        if (typeof openFullscreenVisualizer === "function") {
+            openFullscreenVisualizer();
+        }
         return;
     }
     if (targetWorkspace === "workspace-tag-editor" || targetWorkspace === "tag-editor-modal") {
@@ -3373,12 +3373,14 @@ async function selectTrack(trackId, autoPlay = true) {
     try {
         const res = await fetch(`/api/track/lyrics?id=${track.id}`);
         if (res.ok) {
-            const lyricsArray = await res.json();
+            const data = await res.json();
+            const lrcText = data.synced_lyrics || data.lyrics || "";
+            const lyricsArray = (typeof parseLrc === "function") ? parseLrc(lrcText) : [];
             let parsedHtml = "";
             let lineIdx = 0;
             lyricsArray.forEach(line => {
                 const time = line.time;
-                const text = line.text.trim();
+                const text = (line.text || "").trim();
                 state.lyricLines.push({ time, text, index: lineIdx });
                 parsedHtml += `<div class="lyrics-line" id="lyric-line-${lineIdx}" data-time="${time}">${escapeHtml(text || "🎵")}</div>`;
                 lineIdx++;
@@ -11730,8 +11732,9 @@ async function loadTrackLyrics(trackId) {
         const lrcContentEl = document.getElementById("fs-lyrics-content");
         if (!lrcContentEl) return;
 
-        if (data.success && data.lyrics) {
-            currentParsedLyrics = parseLrc(data.lyrics);
+        const lrcText = data.synced_lyrics || data.lyrics;
+        if (lrcText) {
+            currentParsedLyrics = parseLrc(lrcText);
             if (currentParsedLyrics.length > 0) {
                 lrcContentEl.innerHTML = currentParsedLyrics.map((item, idx) => 
                     `<div class="lrc-line" data-index="${idx}" data-time="${item.time}">${escapeHtml(item.text)}</div>`
