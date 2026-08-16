@@ -1820,6 +1820,28 @@
                             <input type="range" class="system-vol-slider" id="system-volume-slider" min="0" max="100" value="50">
                             <span class="system-vol-pct" id="system-volume-val">50%</span>
                         </div>
+
+                        <!-- Dedicated AI Recommendation Engine Toolbar -->
+                        <div class="ai-engine-quick-bar" style="margin: 12px 0 4px 0; padding: 10px 12px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(6, 182, 212, 0.12)); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px;">
+                            <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                                <span><i class="fa-solid fa-wand-magic-sparkles" style="color: #c084fc; margin-right: 4px;"></i> AI Recommendation Engines</span>
+                                <span style="font-size: 9px; color: #10b981; font-weight: 700; background: rgba(16,185,129,0.15); padding: 1px 5px; border-radius: 4px;">RUST NATIVE</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                                <button id="btn-quick-flow-radio" onclick="if(state.activeTrackId) startInfiniteFlowRadio(state.activeTrackId); else if(state.tracks && state.tracks.length) startInfiniteFlowRadio(state.tracks[0].id);" style="padding: 6px 8px; font-size: 11px; font-weight: 700; background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" title="Spotify/Deezer style continuous smart radio stream">
+                                    <i class="fa-solid fa-tower-broadcast"></i> Flow Radio
+                                </button>
+                                <button id="btn-quick-dj-mix" onclick="if(state.activeTrackId) openDjTransitionsModal(state.activeTrackId); else if(state.tracks && state.tracks.length) openDjTransitionsModal(state.tracks[0].id);" style="padding: 6px 8px; font-size: 11px; font-weight: 700; background: rgba(168, 85, 247, 0.18); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" title="Harmonic Camelot Key & Beatmatch DJ Transitions">
+                                    <i class="fa-solid fa-compact-disc"></i> Harmonic DJ
+                                </button>
+                                <button id="btn-quick-similar-dna" onclick="if(state.activeTrackId) showSimilarTracksModal(state.activeTrackId); else if(state.tracks && state.tracks.length) showSimilarTracksModal(state.tracks[0].id);" style="padding: 6px 8px; font-size: 11px; font-weight: 700; background: rgba(56, 189, 248, 0.18); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" title="Multi-factor acoustic vector similarity ('More Like This')">
+                                    <i class="fa-solid fa-dna"></i> Similar DNA
+                                </button>
+                                <button id="btn-quick-vibe-clusters" onclick="switchWorkspace('workspace-vibe-clusters')" style="padding: 6px 8px; font-size: 11px; font-weight: 700; background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" title="Parallel Rayon K-Means++ 14D Sound Clusters">
+                                    <i class="fa-solid fa-brain"></i> Sound Clusters
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                 </div>

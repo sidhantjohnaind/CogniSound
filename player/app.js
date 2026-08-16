@@ -1556,6 +1556,12 @@ function renderTracks(tracks) {
                     <button class="row-play-btn" title="Play Track" style="background:none; border:none; color:#007acc; cursor:pointer; font-size:12px;">
                         <i class="fa-solid fa-play"></i>
                     </button>
+                    <button class="row-radio-btn" onclick="event.stopPropagation(); startInfiniteFlowRadio(${t.id});" title="Start Infinite Flow Radio (AI Stream)" style="background:none; border:none; color:#10b981; cursor:pointer; font-size:11px; padding: 2px 4px;">
+                        <i class="fa-solid fa-tower-broadcast"></i>
+                    </button>
+                    <button class="row-dj-btn" onclick="event.stopPropagation(); openDjTransitionsModal(${t.id});" title="Harmonic DJ Mix Transitions" style="background:none; border:none; color:#c084fc; cursor:pointer; font-size:11px; padding: 2px 4px;">
+                        <i class="fa-solid fa-compact-disc"></i>
+                    </button>
                     <button class="row-edit-tag-btn" title="Edit Metadata Tags (Ctrl+E)" style="background:none; border:none; color:#f59e0b; cursor:pointer; font-size:11px;">
                         <i class="fa-solid fa-tags"></i>
                     </button>
