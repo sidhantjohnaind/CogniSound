@@ -1,5 +1,5 @@
 # ==============================================================================
-# Sonar Multi-Architecture Cross-Compilation Script (PowerShell / Windows)
+# CogniSound Multi-Architecture Cross-Compilation Script (PowerShell / Windows)
 # Builds binaries for AMD64 (x86_64), ARM64 (aarch64), and RISC-V (riscv64gc)
 # ==============================================================================
 
@@ -8,7 +8,7 @@ param(
 )
 
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host " 🛠️  Sonar Multi-Architecture Compiler (AMD64 / ARM64 / RISC-V)" -ForegroundColor Cyan
+Write-Host " 🛠️  CogniSound Multi-Architecture Compiler (AMD64 / ARM64 / RISC-V)" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 
 $targets = @{

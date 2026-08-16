@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Sonar Multi-Architecture Cross-Compilation Script (Bash / Linux / macOS)
+# CogniSound Multi-Architecture Cross-Compilation Script (Bash / Linux / macOS)
 # Builds binaries for AMD64 (x86_64), ARM64 (aarch64), and RISC-V (riscv64gc)
 # ==============================================================================
 
 set -e
 
 echo "============================================================"
-echo " 🛠️  Sonar Multi-Architecture Compiler (AMD64 / ARM64 / RISC-V)"
+echo " 🛠️  CogniSound Multi-Architecture Compiler (AMD64 / ARM64 / RISC-V)"
 echo "============================================================"
 
 TARGETS=(

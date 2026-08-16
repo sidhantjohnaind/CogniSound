@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🎵 Sonar Music Player & Intelligence Suite
+# 🧠 CogniSound — Cognitive AI Music Player & Parallel Audio Suite
 
-**An ultra-high-performance, parallel audio engine, music intelligence suite, and modern web player written in 100% native Rust.**
+**An ultra-high-performance, parallel audio engine, neural music intelligence suite, and modern web player written in 100% native Rust.**
 
 [![Rust 2024](https://img.shields.io/badge/Rust-2024_Edition-orange?logo=rust)](https://www.rust-lang.org/)
 [![Axum](https://img.shields.io/badge/Web_Framework-Axum_0.8-blue?logo=tokio)](https://github.com/tokio-rs/axum)
