@@ -341,6 +341,12 @@ async fn main() {
         .route("/api/grouping", get(handlers::grouping::get_grouping))
         .route("/api/albums", get(handlers::grouping::get_albums))
         .route("/api/themes", get(handlers::grouping::get_themes))
+        // Acoustic Intelligence & Recommendation Endpoints
+        .route("/api/intelligence/clusters", get(handlers::intelligence::get_acoustic_clusters))
+        .route("/api/intelligence/dna", get(handlers::intelligence::get_library_dna))
+        .route("/api/recommendations/similar", get(handlers::intelligence::get_similar_tracks))
+        .route("/api/recommendations/transition", get(handlers::intelligence::get_dj_transitions))
+        .route("/api/recommendations/radio", get(handlers::intelligence::get_radio_flow))
         .route(
             "/api/interact",
             get(handlers::grouping::handle_interact).post(handlers::grouping::handle_interact),

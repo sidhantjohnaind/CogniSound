@@ -11904,6 +11904,7 @@ if (document.readyState === "loading") {
         try { initTagEditorBindings(); } catch(e) { console.error("Tag Editor init error:", e); }
         try { initAudioVisualizer(); } catch(e) { console.error("Visualizer init error:", e); }
         try { initMusicBeeContextMenuActions(); } catch(e) { console.error("Context menu init error:", e); }
+        try { initAcousticIntelligence(); } catch(e) { console.error("Intelligence init error:", e); }
     });
 } else {
     try { if (typeof loadTracks === "function") loadTracks(1); } catch(e) { console.error("loadTracks error:", e); }
@@ -11912,4 +11913,359 @@ if (document.readyState === "loading") {
     try { initTagEditorBindings(); } catch(e) { console.error("Tag Editor init error:", e); }
     try { initAudioVisualizer(); } catch(e) { console.error("Visualizer init error:", e); }
     try { initMusicBeeContextMenuActions(); } catch(e) { console.error("Context menu init error:", e); }
+    try { initAcousticIntelligence(); } catch(e) { console.error("Intelligence init error:", e); }
 }
+
+// ==============================================================================
+// 🧠 ACOUSTIC INTELLIGENCE & RECOMMENDATION SUITE (Industry Standard)
+// ==============================================================================
+window.cachedAcousticClusters = [];
+window.activeDjSourceTrackId = null;
+window.currentDjMode = 'harmonic';
+
+function initAcousticIntelligence() {
+    const btnClusters = document.getElementById("btn-show-vibe-clusters");
+    if (btnClusters) {
+        btnClusters.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (typeof switchWorkspace === "function") switchWorkspace("workspace-vibe-clusters");
+            fetchAcousticClusters(window.currentKClusters || 6);
+            fetchLibraryDna();
+        });
+    }
+
+    // Bind Context Menu Items
+    const ctxRadio = document.getElementById("ctx-flow-radio");
+    if (ctxRadio) {
+        ctxRadio.addEventListener("click", () => {
+            const trackId = window.lastContextTrackId || state.activeTrackId;
+            if (trackId) startInfiniteFlowRadio(trackId);
+        });
+    }
+
+    const ctxDj = document.getElementById("ctx-harmonic-dj");
+    if (ctxDj) {
+        ctxDj.addEventListener("click", () => {
+            const trackId = window.lastContextTrackId || state.activeTrackId;
+            if (trackId) openDjTransitionsModal(trackId);
+        });
+    }
+
+    const ctxSim = document.getElementById("ctx-similar-tracks");
+    if (ctxSim) {
+        ctxSim.addEventListener("click", () => {
+            const trackId = window.lastContextTrackId || state.activeTrackId;
+            if (trackId) showSimilarTracksModal(trackId);
+        });
+    }
+}
+
+async function fetchLibraryDna() {
+    try {
+        const res = await fetch("/api/intelligence/dna");
+        const data = await res.json();
+        if (!data || !data.dna_radar) return;
+
+        const strip = document.getElementById("library-dna-strip");
+        if (!strip) return;
+
+        const r = data.dna_radar;
+        strip.innerHTML = `
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 8px; flex: 1; min-width: 140px;">
+                <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Library Energy</span>
+                <div style="font-size: 18px; font-weight: 800; color: #f59e0b; margin-top: 2px;">${Math.round(r.energy * 100)}%</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 8px; flex: 1; min-width: 140px;">
+                <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Acousticness</span>
+                <div style="font-size: 18px; font-weight: 800; color: #38bdf8; margin-top: 2px;">${Math.round(r.acousticness * 100)}%</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 8px; flex: 1; min-width: 140px;">
+                <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Valence / Mood</span>
+                <div style="font-size: 18px; font-weight: 800; color: #10b981; margin-top: 2px;">${r.valence >= 0 ? '+' : ''}${r.valence.toFixed(2)}</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 8px; flex: 1; min-width: 140px;">
+                <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Average Tempo</span>
+                <div style="font-size: 18px; font-weight: 800; color: #c084fc; margin-top: 2px;">${r.avg_bpm.toFixed(1)} <span style="font-size: 12px; font-weight: 600;">BPM</span></div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 8px; flex: 1; min-width: 140px;">
+                <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Total Clustered</span>
+                <div style="font-size: 18px; font-weight: 800; color: #f8fafc; margin-top: 2px;">${data.total_tracks.toLocaleString()} <span style="font-size: 12px; font-weight: 600;">Tracks</span></div>
+            </div>
+        `;
+    } catch(err) {
+        console.error("fetchLibraryDna error:", err);
+    }
+}
+
+async function fetchAcousticClusters(k = 6) {
+    window.currentKClusters = k;
+    const grid = document.getElementById("vibe-clusters-grid");
+    if (grid) {
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: #94a3b8; font-size: 14px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: #a855f7; margin-bottom: 12px;"></i>
+                <div>Computing parallel K-Means++ acoustic clusters across 14-dimensional vectors...</div>
+            </div>
+        `;
+    }
+
+    // Update active button
+    document.querySelectorAll(".k-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.innerText === String(k));
+        btn.style.background = btn.innerText === String(k) ? "#007acc" : "transparent";
+        btn.style.color = btn.innerText === String(k) ? "#ffffff" : "#94a3b8";
+    });
+
+    try {
+        const res = await fetch(`/api/intelligence/clusters?k=${k}`);
+        const data = await res.json();
+        if (!data || !data.clusters) throw new Error("Invalid cluster response");
+
+        window.cachedAcousticClusters = data.clusters;
+        renderAcousticClusters(data.clusters);
+    } catch(err) {
+        console.error("fetchAcousticClusters error:", err);
+        if (grid) {
+            grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 30px; text-align: center; color: #f87171;">Failed to calculate clusters: ${err.message}</div>`;
+        }
+    }
+}
+
+function renderAcousticClusters(clusters) {
+    const grid = document.getElementById("vibe-clusters-grid");
+    if (!grid) return;
+
+    if (!clusters || clusters.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8;">No clusters generated.</div>`;
+        return;
+    }
+
+    grid.innerHTML = clusters.map((c, idx) => {
+        const r = c.centroid_radar;
+        const tracksPreview = (c.top_tracks || []).slice(0, 3).map(t => `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; background: rgba(0,0,0,0.25); font-size: 12px; margin-bottom: 4px;">
+                <div style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px;">
+                    <span style="font-weight: 700; color: #f1f5f9;">${escapeHtml(t.title)}</span>
+                    <span style="color: #94a3b8; font-size: 11px;"> • ${escapeHtml(t.artist)}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                    <span style="font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 4px; background: rgba(168,85,247,0.2); color: #c084fc;">${t.camelot_key}</span>
+                    <button onclick="playTrackByIdDirect(${t.id})" style="background: none; border: none; color: #38bdf8; cursor: pointer; padding: 2px 4px;"><i class="fa-solid fa-play"></i></button>
+                </div>
+            </div>
+        `).join("");
+
+        return `
+            <div class="vibe-cluster-card" style="background: #18181b; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 24px rgba(0,0,0,0.4); transition: transform 0.2s, border-color 0.2s;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 24px;">${c.vibe_emoji}</span>
+                        <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,0.08); color: #cbd5e1;">${c.track_count.toLocaleString()} tracks</span>
+                    </div>
+                    <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #f8fafc;">${escapeHtml(c.name)}</h3>
+                    <p style="margin: 0 0 14px 0; font-size: 12px; color: #94a3b8; line-height: 1.4;">${escapeHtml(c.description)}</p>
+
+                    <!-- Radar Metrics Chips -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">
+                        <span style="font-size: 10.5px; font-weight: 700; background: rgba(245,158,11,0.15); color: #fbbf24; padding: 2px 7px; border-radius: 4px;">Energy ${Math.round(r.energy * 100)}%</span>
+                        <span style="font-size: 10.5px; font-weight: 700; background: rgba(56,189,248,0.15); color: #38bdf8; padding: 2px 7px; border-radius: 4px;">Acoustic ${Math.round(r.acousticness * 100)}%</span>
+                        <span style="font-size: 10.5px; font-weight: 700; background: rgba(168,85,247,0.15); color: #c084fc; padding: 2px 7px; border-radius: 4px;">${r.avg_bpm.toFixed(0)} BPM</span>
+                    </div>
+
+                    <!-- Top Tracks Preview -->
+                    <div style="margin-bottom: 14px;">
+                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px;">Archetype Tracks</div>
+                        ${tracksPreview}
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: auto;">
+                    <button onclick="playVibeCluster(${c.cluster_id})" class="action-btn-lg" style="flex: 1; height: 34px; font-size: 12px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <i class="fa-solid fa-play"></i> Play Vibe
+                    </button>
+                    <button onclick="queueVibeCluster(${c.cluster_id})" class="action-btn-sm" style="height: 34px; padding: 0 12px; font-size: 12px; border-radius: 6px;" title="Queue All Tracks">
+                        <i class="fa-solid fa-list-ol"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+async function playVibeCluster(clusterId) {
+    const cluster = (window.cachedAcousticClusters || []).find(c => c.cluster_id === clusterId);
+    if (!cluster || !cluster.top_tracks || cluster.top_tracks.length === 0) {
+        showToast("Cluster tracks not loaded", "error");
+        return;
+    }
+    const seedId = cluster.top_tracks[0].id;
+    startInfiniteFlowRadio(seedId);
+    showToast(`Started Vibe Stream: ${cluster.name}`, "success");
+}
+
+function queueVibeCluster(clusterId) {
+    const cluster = (window.cachedAcousticClusters || []).find(c => c.cluster_id === clusterId);
+    if (!cluster || !cluster.top_tracks) return;
+    cluster.top_tracks.forEach(t => {
+        if (typeof queueTrack === "function") queueTrack(t.id);
+    });
+    showToast(`Queued tracks from ${cluster.name}`, "success");
+}
+
+async function startInfiniteFlowRadio(seedId) {
+    try {
+        showToast("Generating Flow Radio station...", "info");
+        const res = await fetch(`/api/recommendations/radio?seed_id=${seedId}&count=25&diversity=0.35`);
+        const data = await res.json();
+        if (!data || !data.radio || !data.radio.tracks) throw new Error("Invalid radio response");
+
+        const tracks = data.radio.tracks;
+        if (tracks.length === 0) {
+            showToast("No similar tracks found for radio flow", "error");
+            return;
+        }
+
+        // Set queue and play first track
+        if (typeof setQueueAndPlay === "function") {
+            const queueItems = tracks.map(t => ({ id: t.id, title: t.title, artist: t.artist, duration: t.duration }));
+            setQueueAndPlay(queueItems, 0);
+        } else {
+            playTrackByIdDirect(tracks[0].id);
+        }
+        showToast(`Infinite Radio Flow: ${data.radio.seed_title}`, "success");
+    } catch(err) {
+        console.error("startInfiniteFlowRadio error:", err);
+        showToast(`Failed to generate radio: ${err.message}`, "error");
+    }
+}
+
+async function openDjTransitionsModal(trackId) {
+    window.activeDjSourceTrackId = trackId;
+    const modal = document.getElementById("dj-transitions-modal");
+    if (modal) modal.style.display = "flex";
+    loadDjTransitionsForMode(window.currentDjMode || "harmonic");
+}
+
+async function loadDjTransitionsForMode(mode) {
+    window.currentDjMode = mode;
+    const trackId = window.activeDjSourceTrackId || state.activeTrackId;
+    if (!trackId) return;
+
+    // Highlight active mode tab
+    document.querySelectorAll(".dj-mode-btn").forEach(b => {
+        const isMatch = b.getAttribute("onclick").includes(mode);
+        b.style.background = isMatch ? "#a855f7" : "transparent";
+        b.style.color = isMatch ? "#ffffff" : "#cbd5e1";
+    });
+
+    const list = document.getElementById("dj-transitions-list");
+    if (list) {
+        list.innerHTML = `<div style="padding: 30px; text-align: center; color: #94a3b8;"><i class="fa-solid fa-spinner fa-spin" style="font-size: 20px; color: #a855f7;"></i> Calculating DJ harmonic beatmatch matches...</div>`;
+    }
+
+    try {
+        const res = await fetch(`/api/recommendations/transition?track_id=${trackId}&mode=${mode}&limit=12`);
+        const data = await res.json();
+        if (!data || !data.transitions) throw new Error("Invalid transition response");
+
+        const src = data.source;
+        const info = document.getElementById("dj-modal-track-info");
+        if (info && src) {
+            info.innerHTML = `<strong style="color: #f1f5f9;">${escapeHtml(src.title)}</strong> by ${escapeHtml(src.artist)} • <span style="color: #c084fc; font-weight: 700;">Key: ${src.camelot_key}</span> • <span>${src.bpm.toFixed(1)} BPM</span>`;
+        }
+
+        if (list) {
+            if (data.transitions.length === 0) {
+                list.innerHTML = `<div style="padding: 20px; text-align: center; color: #94a3b8;">No matching transitions found for this mode.</div>`;
+                return;
+            }
+
+            list.innerHTML = data.transitions.map(t => `
+                <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                            <span style="font-size: 13px; font-weight: 700; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(t.title)}</span>
+                            <span style="font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(168,85,247,0.25); color: #e9d5ff;">${t.camelot_key}</span>
+                            <span style="font-size: 11px; color: #94a3b8;">${t.bpm.toFixed(1)} BPM</span>
+                        </div>
+                        <div style="font-size: 11.5px; color: #64748b;">${escapeHtml(t.artist)} • <span style="color: #38bdf8;">${t.dj_mixing_advice}</span></div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                        <div style="text-align: right;">
+                            <div style="font-size: 14px; font-weight: 800; color: #10b981;">${t.mixability_score}%</div>
+                            <div style="font-size: 10px; color: #64748b;">Mixability</div>
+                        </div>
+                        <button onclick="playTrackByIdDirect(${t.candidate_id}); document.getElementById('dj-transitions-modal').style.display='none';" class="action-btn-sm" style="height: 30px; padding: 0 12px; font-size: 11px;">
+                            <i class="fa-solid fa-play"></i> Play
+                        </button>
+                    </div>
+                </div>
+            `).join("");
+        }
+    } catch(err) {
+        console.error("loadDjTransitionsForMode error:", err);
+        if (list) list.innerHTML = `<div style="padding: 20px; text-align: center; color: #f87171;">Error loading transitions: ${err.message}</div>`;
+    }
+}
+
+async function showSimilarTracksModal(trackId) {
+    const modal = document.getElementById("similar-tracks-modal");
+    if (modal) modal.style.display = "flex";
+
+    const list = document.getElementById("similar-tracks-list");
+    if (list) {
+        list.innerHTML = `<div style="padding: 30px; text-align: center; color: #94a3b8;"><i class="fa-solid fa-spinner fa-spin" style="font-size: 20px; color: #38bdf8;"></i> Analyzing multi-factor acoustic similarity...</div>`;
+    }
+
+    try {
+        const res = await fetch(`/api/recommendations/similar?track_id=${trackId}&limit=12`);
+        const data = await res.json();
+        if (!data || !data.recommendations) throw new Error("Invalid similarity response");
+
+        const target = data.target;
+        const info = document.getElementById("similar-modal-track-info");
+        if (info && target) {
+            info.innerHTML = `<strong style="color: #f1f5f9;">${escapeHtml(target.title)}</strong> by ${escapeHtml(target.artist)} • Key: ${target.camelot_key}`;
+        }
+
+        if (list) {
+            list.innerHTML = data.recommendations.map(r => `
+                <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 13px; font-weight: 700; color: #f8fafc; margin-bottom: 2px;">${escapeHtml(r.title)} <span style="color: #94a3b8; font-weight: 500;">by ${escapeHtml(r.artist)}</span></div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">
+                            <span style="font-size: 10px; background: rgba(56,189,248,0.15); color: #38bdf8; padding: 1px 6px; border-radius: 4px;">Acoustic: ${r.breakdown.acoustic_match}%</span>
+                            <span style="font-size: 10px; background: rgba(168,85,247,0.15); color: #c084fc; padding: 1px 6px; border-radius: 4px;">Harmonic: ${r.breakdown.harmonic_match}%</span>
+                            <span style="font-size: 10px; background: rgba(245,158,11,0.15); color: #fbbf24; padding: 1px 6px; border-radius: 4px;">Timbral: ${r.breakdown.timbral_match}%</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                        <div style="text-align: right;">
+                            <div style="font-size: 14px; font-weight: 800; color: #38bdf8;">${r.overall_similarity}%</div>
+                            <div style="font-size: 10px; color: #64748b;">Match</div>
+                        </div>
+                        <button onclick="playTrackByIdDirect(${r.id}); document.getElementById('similar-tracks-modal').style.display='none';" class="action-btn-sm" style="height: 30px; padding: 0 12px; font-size: 11px;">
+                            <i class="fa-solid fa-play"></i> Play
+                        </button>
+                    </div>
+                </div>
+            `).join("");
+        }
+    } catch(err) {
+        console.error("showSimilarTracksModal error:", err);
+        if (list) list.innerHTML = `<div style="padding: 20px; text-align: center; color: #f87171;">Error loading similar tracks: ${err.message}</div>`;
+    }
+}
+
+function playTrackByIdDirect(trackId) {
+    if (typeof playTrack === "function") {
+        playTrack(trackId);
+    } else {
+        fetch(`/api/player/play_id`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: trackId })
+        }).catch(err => console.error("play_id error:", err));
+    }
+}
+

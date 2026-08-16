@@ -3,6 +3,7 @@ pub mod art;
 pub mod audio;
 pub mod grouping;
 pub mod history;
+pub mod intelligence;
 pub mod player;
 pub mod playlists;
 pub mod remote;
